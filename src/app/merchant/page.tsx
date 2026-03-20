@@ -16,7 +16,7 @@ export default function MerchantDashboard() {
 
   const handleLogout = async () => {
     await logout();
-    router.replace("/login/merchant");
+    router.replace("/");
   };
 
   return (

@@ -17,6 +17,7 @@ import {
   Loader2,
 } from "lucide-react";
 import dispatchLogo from "@/assets/dispatch-logo.png";
+import { toast } from "sonner";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useI18n } from "@/intl";
@@ -48,7 +49,7 @@ function getAttemptData(role: string): { count: number; firstAttemptAt: number }
   try {
     const raw = sessionStorage.getItem(getAttemptKey(role));
     if (raw) return JSON.parse(raw);
-  } catch {}
+  } catch { }
   return { count: 0, firstAttemptAt: 0 };
 }
 
@@ -98,7 +99,7 @@ export default function LoginPage() {
     setFieldErrors({});
     setEmail("");
     setPassword("");
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [role]);
 
   useEffect(() => {
@@ -107,7 +108,7 @@ export default function LoginPage() {
       checkLockout();
     }, 1000);
     return () => clearInterval(interval);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLockedOut]);
 
   function checkLockout() {
@@ -163,7 +164,10 @@ export default function LoginPage() {
       const tokens = await keycloakLogin(email, password);
       clearAttemptData(role);
       setTokens(tokens);
-      router.push(ROLE_DASHBOARDS[role]);
+      toast.success("Login successful!", {
+        description: "Redirecting to your dashboard...",
+      });
+      setTimeout(() => router.push(ROLE_DASHBOARDS[role]), 1000);
     } catch (err) {
       const authErr = err as AuthError;
       setError(authErr.message);
@@ -284,11 +288,10 @@ export default function LoginPage() {
                 }}
                 required
                 disabled={isLockedOut || isLoading}
-                className={`h-11 rounded-xl bg-card border-border/60 focus:border-primary/40 ${
-                  fieldErrors.email
+                className={`h-11 rounded-xl bg-card border-border/60 focus:border-primary/40 ${fieldErrors.email
                     ? "border-destructive/60 focus:border-destructive/80"
                     : ""
-                }`}
+                  }`}
               />
               {fieldErrors.email && (
                 <p className="text-xs text-destructive mt-1">
@@ -326,11 +329,10 @@ export default function LoginPage() {
                   }}
                   required
                   disabled={isLockedOut || isLoading}
-                  className={`h-11 rounded-xl bg-card border-border/60 focus:border-primary/40 pr-10 ${
-                    fieldErrors.password
+                  className={`h-11 rounded-xl bg-card border-border/60 focus:border-primary/40 pr-10 ${fieldErrors.password
                       ? "border-destructive/60 focus:border-destructive/80"
                       : ""
-                  }`}
+                    }`}
                 />
                 <button
                   type="button"

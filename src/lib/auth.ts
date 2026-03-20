@@ -58,6 +58,7 @@ export function isTokenExpired(accessToken: string): boolean {
   }
 }
 
+// 🔐 Keycloak Login (unchanged)
 export async function login(username: string, password: string): Promise<TokenResponse> {
   let res: Response;
   try {
@@ -95,6 +96,7 @@ export async function login(username: string, password: string): Promise<TokenRe
   return res.json();
 }
 
+// 🔁 Refresh token
 export async function refreshAccessToken(refreshToken: string): Promise<TokenResponse> {
   const res = await fetch("/api/auth/refresh", {
     method: "POST",
@@ -109,6 +111,7 @@ export async function refreshAccessToken(refreshToken: string): Promise<TokenRes
   return res.json();
 }
 
+// 🚪 Logout
 export async function logout(refreshToken: string): Promise<void> {
   try {
     await fetch("/api/auth/logout", {
@@ -117,11 +120,44 @@ export async function logout(refreshToken: string): Promise<void> {
       body: JSON.stringify({ refresh_token: refreshToken }),
     });
   } catch {
-    // Logout is best-effort — if server is unreachable, we still clear local state
+    // silently fail
   }
 }
 
-// Storage keys
+// 🆕 Merchant Registration (FIXED + CORS SAFE)
+export async function registerMerchant(
+  payload: Record<string, string>
+): Promise<any> {
+  let res: Response;
+
+  try {
+    res = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+  } catch {
+    throw {
+      code: "NETWORK_ERROR",
+      message: "Unable to reach the server.",
+    } as AuthError;
+  }
+
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    throw {
+      code: "UNKNOWN",
+      message: data.message || data.error || "Registration failed",
+    } as AuthError;
+  }
+
+  return data;
+}
+
+// 💾 Storage keys
 const STORAGE_KEYS = {
   ACCESS_TOKEN: "dispatch_access_token",
   REFRESH_TOKEN: "dispatch_refresh_token",

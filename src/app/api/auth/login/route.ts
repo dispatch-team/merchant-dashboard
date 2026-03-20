@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { TOKEN_URL, KEYCLOAK_CLIENT_ID, KEYCLOAK_CLIENT_SECRET } from "@/lib/keycloak.server";
 
 export async function POST(request: NextRequest) {
   const { username, password } = await request.json();
@@ -11,18 +10,24 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const res = await fetch(TOKEN_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      grant_type: "password",
-      client_id: KEYCLOAK_CLIENT_ID,
-      client_secret: KEYCLOAK_CLIENT_SECRET,
-      username,
-      password,
-    }),
-  });
+  const loginUrl = "http://localhost:8080/api/v1/merchants/login";
 
-  const data = await res.json();
-  return NextResponse.json(data, { status: res.status });
+  try {
+    const res = await fetch(loginUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
+
+    const data = await res.json().catch((e) => ({}));
+    if (!res.ok) {
+      return NextResponse.json(data, { status: res.status });
+    }
+    return NextResponse.json(data, { status: 200 });
+  } catch (err) {
+    return NextResponse.json(
+      { error: "network_error", error_description: "Unable to reach backend" },
+      { status: 500 }
+    );
+  }
 }

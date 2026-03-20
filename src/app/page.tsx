@@ -139,6 +139,11 @@ export default function Index() {
                 {tNav("login")}
               </Button>
             </Link>
+            <Link href="/register">
+              <Button size="sm">
+                {tNav("getStarted")}
+              </Button>
+            </Link>
           </div>
         </div>
       </nav>
@@ -183,9 +188,9 @@ export default function Index() {
             <button className="rounded-full gap-2 px-8 h-12 text-base shadow-[0_0_30px_hsl(270,70%,60%,0.3)] hover:shadow-[0_0_40px_hsl(270,70%,60%,0.5)] transition-all bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center font-medium">
               {tHero("downloadDriverApp")} <ArrowRight className="h-4 w-4" />
             </button>
-            <Link href="/login/merchant">
+            <Link href="/register">
               <Button variant="outline" size="lg" className="rounded-full px-8 h-12 text-base border-border/60 hover:border-primary/40">
-                {tHero("merchantLogin")}
+                {tNav("getStarted")}
               </Button>
             </Link>
           </div>
