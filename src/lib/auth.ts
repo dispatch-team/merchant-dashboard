@@ -171,6 +171,8 @@ const STORAGE_KEYS = {
 export function persistTokens(tokens: TokenResponse): void {
   localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, tokens.access_token);
   localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, tokens.refresh_token);
+  // Add cookie for API routes (like logo proxy)
+  document.cookie = `access_token=${tokens.access_token}; path=/; max-age=${tokens.expires_in}; SameSite=Lax`;
 }
 
 export function getStoredTokens(): { accessToken: string | null; refreshToken: string | null } {
@@ -183,4 +185,6 @@ export function getStoredTokens(): { accessToken: string | null; refreshToken: s
 export function clearStoredTokens(): void {
   localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
   localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+  // Clear cookie
+  document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 }
