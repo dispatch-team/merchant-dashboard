@@ -1,30 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
-import { LOGOUT_URL, KEYCLOAK_CLIENT_ID, KEYCLOAK_CLIENT_SECRET } from "@/lib/keycloak.server";
+
+const BACKEND_LOGOUT_URL = "http://localhost:8000/api/v1/merchants/logout";
 
 export async function POST(request: NextRequest) {
   const { refresh_token } = await request.json();
 
-  if (!refresh_token) {
-    return NextResponse.json(
-      { error: "invalid_request", error_description: "Refresh token is required." },
-      { status: 400 }
-    );
+  // Best-effort: attempt to invalidate the session on the backend.
+  // Even if it fails, always return success so the client clears its tokens.
+  try {
+    if (refresh_token) {
+      await fetch(BACKEND_LOGOUT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh_token }),
+      });
+    }
+  } catch {
+    // Silently ignore — logout is best-effort
   }
 
-  const res = await fetch(LOGOUT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      client_id: KEYCLOAK_CLIENT_ID,
-      client_secret: KEYCLOAK_CLIENT_SECRET,
-      refresh_token,
-    }),
-  });
-
-  if (res.ok || res.status === 204) {
-    return NextResponse.json({ success: true });
-  }
-
-  const data = await res.json().catch(() => ({}));
-  return NextResponse.json(data, { status: res.status });
+  return NextResponse.json({ success: true });
 }

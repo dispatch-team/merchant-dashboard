@@ -85,14 +85,25 @@ export default function RegisterPage() {
       if (formData.description) payload.description = formData.description;
       if (formData.websiteUrl) payload.website_url = formData.websiteUrl;
 
-      await registerMerchant(payload);
+      const resp = await registerMerchant(payload);
+      const merchantData = resp?.data ?? resp;
       toast.success("Account created successfully!", {
-        description: "Redirecting you to the Merchant Login page.",
+        description: `Merchant ID: ${merchantData?.id ?? 'N/A'} · Status: ${merchantData?.status ?? 'PENDING'}. Redirecting to login...`,
       });
-      setTimeout(() => router.push("/login/merchant"), 1500);
+      setTimeout(() => router.push("/login/merchant"), 2000);
     } catch (err) {
       const authErr = err as AuthError;
-      setError(authErr.message || "Something went wrong. Please try again.");
+      const msg = authErr.message || "Something went wrong. Please try again.";
+      
+      if (msg === "a user with this email already exists" || msg.toLowerCase().includes("email")) {
+        setFieldErrors({ email: msg });
+      } else if (msg.toLowerCase().includes("password")) {
+        setFieldErrors({ password: msg });
+      } else if (msg.toLowerCase().includes("phone")) {
+        setFieldErrors({ phone: msg });
+      } else {
+        setError(msg);
+      }
     } finally {
       setIsLoading(false);
     }

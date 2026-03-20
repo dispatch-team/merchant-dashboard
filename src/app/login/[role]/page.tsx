@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -70,6 +70,7 @@ export default function LoginPage() {
   const role: RoleKey = (roleStr as RoleKey) in ROLE_ICONS ? (roleStr as RoleKey) : "merchant";
   const router = useRouter();
   const { setTokens, isAuthenticated } = useAuth();
+  const hasRedirected = useRef(false);
 
   const t = useI18n("login");
   const roleLabel = t(`roles.${role}.label`);
@@ -88,7 +89,8 @@ export default function LoginPage() {
   const [lockoutRemaining, setLockoutRemaining] = useState(0);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !hasRedirected.current) {
+      hasRedirected.current = true;
       router.replace(ROLE_DASHBOARDS[role]);
     }
   }, [isAuthenticated, role, router]);
@@ -170,9 +172,17 @@ export default function LoginPage() {
       setTimeout(() => router.push(ROLE_DASHBOARDS[role]), 1000);
     } catch (err) {
       const authErr = err as AuthError;
-      setError(authErr.message);
+      const msg = authErr.message;
 
-      if (authErr.code === "INVALID_CREDENTIALS") {
+      if (msg.toLowerCase().includes("email") || msg.toLowerCase().includes("user not found") || msg.toLowerCase().includes("account")) {
+        setFieldErrors({ email: msg });
+      } else if (msg.toLowerCase().includes("password") || msg.toLowerCase().includes("credentials")) {
+        setFieldErrors({ password: msg });
+      } else {
+        setError(msg);
+      }
+
+      if (authErr.code === "INVALID_CREDENTIALS" || msg.toLowerCase().includes("invalid")) {
         const data = getAttemptData(role);
         const now = Date.now();
         if (data.count === 0 || now - data.firstAttemptAt >= LOCKOUT_DURATION_MS) {
@@ -252,23 +262,30 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Error banner */}
-          {error && (
-            <div className="flex items-start gap-2.5 bg-destructive/10 border border-destructive/20 rounded-xl p-3.5 mb-6 animate-fade-in">
+          {/* Notification area — always occupies space to prevent layout shift */}
+          <div className="mb-6 overflow-hidden">
+            {/* Error banner */}
+            <div
+              className={`flex items-start gap-2.5 bg-destructive/10 border border-destructive/20 rounded-xl p-3.5 transition-all duration-200 ${
+                error ? "opacity-100 max-h-28" : "opacity-0 max-h-0 p-0 border-0"
+              }`}
+            >
               <AlertCircle className="h-4 w-4 text-destructive flex-shrink-0 mt-0.5" />
               <p className="text-sm text-destructive">{error}</p>
             </div>
-          )}
 
-          {/* Lockout banner */}
-          {isLockedOut && (
-            <div className="flex items-start gap-2.5 bg-warning/10 border border-warning/20 rounded-xl p-3.5 mb-6 animate-fade-in">
+            {/* Lockout banner */}
+            <div
+              className={`flex items-start gap-2.5 bg-warning/10 border border-warning/20 rounded-xl p-3.5 transition-all duration-200 ${
+                isLockedOut ? "opacity-100 max-h-28" : "opacity-0 max-h-0 p-0 border-0"
+              }`}
+            >
               <AlertCircle className="h-4 w-4 text-warning flex-shrink-0 mt-0.5" />
               <p className="text-sm text-warning">
                 {t("lockout.message", { time: formatTime(lockoutRemaining) })}
               </p>
             </div>
-          )}
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email */}
@@ -289,8 +306,8 @@ export default function LoginPage() {
                 required
                 disabled={isLockedOut || isLoading}
                 className={`h-11 rounded-xl bg-card border-border/60 focus:border-primary/40 ${fieldErrors.email
-                    ? "border-destructive/60 focus:border-destructive/80"
-                    : ""
+                  ? "border-destructive/60 focus:border-destructive/80"
+                  : ""
                   }`}
               />
               {fieldErrors.email && (
@@ -330,8 +347,8 @@ export default function LoginPage() {
                   required
                   disabled={isLockedOut || isLoading}
                   className={`h-11 rounded-xl bg-card border-border/60 focus:border-primary/40 pr-10 ${fieldErrors.password
-                      ? "border-destructive/60 focus:border-destructive/80"
-                      : ""
+                    ? "border-destructive/60 focus:border-destructive/80"
+                    : ""
                     }`}
                 />
                 <button

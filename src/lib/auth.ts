@@ -90,6 +90,11 @@ export async function login(username: string, password: string): Promise<TokenRe
       throw { code: "UNKNOWN", message: "Authentication service misconfigured. Contact your administrator." } as AuthError;
     }
 
+    // Support Go backend `{ error: "...", code: "..." }` responses
+    if (error) {
+      throw { code: (body as any).code || "UNKNOWN", message: error } as AuthError;
+    }
+
     throw { code: "UNKNOWN", message: "Authentication failed. Please try again." } as AuthError;
   }
 
