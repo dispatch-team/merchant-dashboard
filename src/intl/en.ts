@@ -204,6 +204,26 @@ const en = {
     logout: "Sign Out",
   },
 
+  // ─── Profile Page ───────────────────────────────────────────────────────────
+  profile: {
+    title: "Merchant Profile",
+    subtitle: "Manage your business information and branding.",
+    companyName: "Company Name",
+    companyAddress: "Company Address",
+    industry: "Industry",
+    description: "Description",
+    phoneNumber: "Phone Number",
+    email: "Email Address",
+    websiteUrl: "Website URL",
+    companyLogo: "Company Logo",
+    uploadLogo: "Upload Logo",
+    changeLogo: "Change Logo",
+    saveChanges: "Save Changes",
+    saving: "Saving...",
+    success: "Profile updated successfully",
+    error: "Failed to update profile",
+  },
+
   // ─── Common ─────────────────────────────────────────────────────────────────
   common: {
     language: "Language",

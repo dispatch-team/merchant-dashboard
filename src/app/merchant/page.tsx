@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Package,
@@ -13,6 +14,7 @@ import {
   Bell,
   Settings,
   User,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -23,6 +25,7 @@ import { toast } from "sonner";
 import dispatchLogo from "@/assets/dispatch-logo.png";
 
 const STAT_CARDS = [
+  // ... (remains same)
   {
     label: "Active Shipments",
     value: "—",
@@ -60,8 +63,32 @@ const QUICK_ACTIONS = [
 ];
 
 export default function MerchantDashboard() {
-  const { user, logout } = useAuth();
+  const { user, logout, getValidAccessToken } = useAuth();
   const router = useRouter();
+  const [merchantProfile, setMerchantProfile] = useState<any>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+
+  useEffect(() => {
+    async function fetchProfile() {
+      try {
+        const token = await getValidAccessToken();
+        if (!token) return;
+
+        const res = await fetch("/api/merchant/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setMerchantProfile(data);
+        }
+      } catch (err) {
+        console.error("Failed to load profile:", err);
+      } finally {
+        setIsLoadingProfile(false);
+      }
+    }
+    fetchProfile();
+  }, [getValidAccessToken]);
 
   const handleLogout = async () => {
     await logout();
@@ -72,6 +99,10 @@ export default function MerchantDashboard() {
   const initials = user
     ? `${user.given_name?.[0] ?? ""}${user.family_name?.[0] ?? ""}`.toUpperCase() || user.email[0].toUpperCase()
     : "M";
+
+  const logoUrl = merchantProfile?.company_logo_id 
+    ? `/api/merchant/logo/${merchantProfile.company_logo_id}` 
+    : null;
 
   return (
     <AuthGuard allowedRoles={["merchant"]} loginPath="/login/merchant">
@@ -95,7 +126,12 @@ export default function MerchantDashboard() {
               <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-lg">
                 <Bell className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-lg">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => router.push("/merchant/profile")}
+                className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-lg"
+              >
                 <Settings className="h-4 w-4" />
               </Button>
               <LanguageSwitcher />
@@ -120,13 +156,19 @@ export default function MerchantDashboard() {
           {/* Welcome hero */}
           <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-base shadow-inner flex-shrink-0">
-                {initials}
+              <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-base shadow-inner flex-shrink-0 overflow-hidden">
+                {isLoadingProfile ? (
+                  <Loader2 className="h-5 w-5 animate-spin opacity-40" />
+                ) : logoUrl ? (
+                  <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                ) : (
+                  initials
+                )}
               </div>
               <div>
                 <p className="text-xs text-muted-foreground mb-0.5">Welcome back</p>
                 <h1 className="text-xl font-bold text-foreground tracking-tight">
-                  {user?.name || user?.email || "Merchant"}
+                  {merchantProfile?.company_name || user?.name || user?.email || "Merchant"}
                 </h1>
                 {user?.email && (
                   <p className="text-xs text-muted-foreground/60">{user.email}</p>
@@ -195,8 +237,11 @@ export default function MerchantDashboard() {
           {/* Account info */}
           <section>
             <h2 className="text-xs text-muted-foreground/70 font-medium uppercase tracking-wider mb-4">Account</h2>
-            <div className="rounded-2xl border border-border/50 bg-card/60 backdrop-blur-sm divide-y divide-border/40">
-              <div className="flex items-center justify-between p-4">
+            <div className="rounded-2xl border border-border/50 bg-card/60 backdrop-blur-sm divide-y divide-border/40 overflow-hidden">
+              <button 
+                onClick={() => router.push("/merchant/profile")}
+                className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors text-left"
+              >
                 <div className="flex items-center gap-3">
                   <User className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm text-foreground">Profile</span>
@@ -205,7 +250,7 @@ export default function MerchantDashboard() {
                   <span className="text-xs text-muted-foreground">{user?.email}</span>
                   <ChevronRight className="h-4 w-4 text-muted-foreground/40" />
                 </div>
-              </div>
+              </button>
               <div className="flex items-center justify-between p-4">
                 <div className="flex items-center gap-3">
                   <Package className="h-4 w-4 text-muted-foreground" />

@@ -204,6 +204,26 @@ const am: Messages = {
     logout: "ውጣ",
   },
 
+  // ─── Profile Page ───────────────────────────────────────────────────────────
+  profile: {
+    title: "የነጋዴ መገለጫ",
+    subtitle: "የንግድ መረጃዎን እና ብራንዲንግዎን ያስተዳድሩ።",
+    companyName: "የኩባንያ ስም",
+    companyAddress: "የኩባንያ አድራሻ",
+    industry: "የስራ መስክ",
+    description: "መግለጫ",
+    phoneNumber: "ስልክ ቁጥር",
+    email: "ኢሜይል አድራሻ",
+    websiteUrl: "የድረ-ገጽ አድራሻ",
+    companyLogo: "የኩባንያ አርማ",
+    uploadLogo: "አርማ ስቀል",
+    changeLogo: "አርማ ቀይር",
+    saveChanges: "ለውጦችን አስቀምጥ",
+    saving: "በማስቀመጥ ላይ...",
+    success: "መገለጫው በትክክል ተዘምኗል",
+    error: "መገለጫውን ማዘመን አልተቻለም",
+  },
+
   // ─── Common ─────────────────────────────────────────────────────────────────
   common: {
     language: "ቋንቋ",
