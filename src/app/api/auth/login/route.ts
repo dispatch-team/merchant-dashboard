@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const loginUrl = "http://localhost:8000/api/v1/merchants/login";
+  const loginUrl = "https://service.staging.dispattch.dev/api/v1/merchants/login";
   console.log("[merchant login] POSTing to:", loginUrl, "username:", username);
 
   try {

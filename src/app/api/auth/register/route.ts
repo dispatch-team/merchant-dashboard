@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
   const body = await request.json();
 
-  const registerUrl = "http://localhost:8000/api/v1/merchants/";
+  const registerUrl = "https://service.staging.dispattch.dev/api/v1/merchants/";
 
   try {
     const res = await fetch(registerUrl, {

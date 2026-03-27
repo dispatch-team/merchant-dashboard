@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BACKEND_LOGOUT_URL = "http://localhost:8000/api/v1/merchants/logout";
+const BACKEND_LOGOUT_URL = "https://service.staging.dispattch.dev/api/v1/merchants/logout";
 
 export async function POST(request: NextRequest) {
   const { refresh_token } = await request.json();

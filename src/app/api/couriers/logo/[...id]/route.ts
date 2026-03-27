@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const LOGO_BASE_URL = "https://service.staging.dispattch.dev/api/v1/merchants/logos/";
+const LOGO_BASE_URL = "https://service.staging.dispattch.dev/api/v1/couriers/logos/";
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string[] }> }
 ) {
-  // Await params in Next.js 15
   const awaitedParams = await params;
 
-  // Try to get token from Authorization header or cookie
   let token = "";
   const authHeader = request.headers.get("authorization");
   if (authHeader && authHeader.startsWith("Bearer ")) {
@@ -47,9 +45,9 @@ export async function GET(
       },
     });
   } catch (err) {
-    console.error("Failed to fetch merchant logo:", err);
+    console.error("Failed to fetch courier logo:", err);
     return NextResponse.json(
-      { error: "network_error", error_description: "Unable to reach backend" },
+      { error: "network_error", error_description: "Unable to reach courier service" },
       { status: 500 }
     );
   }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const PROFILE_URL = "http://localhost:8000/api/v1/merchants/profile";
+const PROFILE_URL = "https://service.staging.dispattch.dev/api/v1/merchants/profile";
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-const UPDATE_URL = "http://localhost:8000/api/v1/merchants/";
+const UPDATE_URL = "https://service.staging.dispattch.dev/api/v1/merchants/";
 
 export async function PATCH(request: NextRequest) {
   try {

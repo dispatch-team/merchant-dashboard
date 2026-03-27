@@ -57,9 +57,9 @@ const STAT_CARDS = [
 ];
 
 const QUICK_ACTIONS = [
-  { label: "New Shipment", icon: Package, desc: "Create and dispatch a new order" },
-  { label: "Browse Couriers", icon: Truck, desc: "Compare and select courier partners" },
-  { label: "View Analytics", icon: BarChart3, desc: "Track performance and trends" },
+  { label: "New Shipment", icon: Package, desc: "Create and dispatch a new order", path: "/merchant/shipments/new" },
+  { label: "Browse Couriers", icon: Truck, desc: "Compare and select courier partners", path: "/merchant/couriers" },
+  { label: "View Analytics", icon: BarChart3, desc: "Track performance and trends", path: "/merchant/analytics" },
 ];
 
 export default function MerchantDashboard() {
@@ -216,6 +216,7 @@ export default function MerchantDashboard() {
                 return (
                   <button
                     key={action.label}
+                    onClick={() => action.path && router.push(action.path)}
                     className="group text-left rounded-2xl border border-border/50 bg-card/60 backdrop-blur-sm p-5 hover:border-primary/30 hover:bg-card/80 transition-all duration-200 flex items-start justify-between gap-4"
                   >
                     <div className="flex items-start gap-4">
