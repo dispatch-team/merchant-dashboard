@@ -111,7 +111,6 @@ export default function ProfilePage() {
         "industry", 
         "description", 
         "phone_number", 
-        "email", 
         "website_url"
       ] as const;
 
@@ -329,32 +328,18 @@ export default function ProfilePage() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email">{t("email")}</Label>
+                    <Label htmlFor="website_url">{t("websiteUrl")}</Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50" />
+                      <Globe className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50" />
                       <Input 
-                        id="email" 
-                        type="email"
+                        id="website_url" 
+                        type="url"
                         className="pl-9 bg-background/50"
-                        value={profile?.email || ""} 
-                        onChange={(e) => setProfile(p => p ? { ...p, email: e.target.value } : null)}
-                        required
+                        value={profile?.website_url || ""} 
+                        onChange={(e) => setProfile(p => p ? { ...p, website_url: e.target.value } : null)}
+                        placeholder="https://example.com"
                       />
                     </div>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="website_url">{t("websiteUrl")}</Label>
-                  <div className="relative">
-                    <Globe className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50" />
-                    <Input 
-                      id="website_url" 
-                      type="url"
-                      className="pl-9 bg-background/50"
-                      value={profile?.website_url || ""} 
-                      onChange={(e) => setProfile(p => p ? { ...p, website_url: e.target.value } : null)}
-                      placeholder="https://example.com"
-                    />
                   </div>
                 </div>
               </CardContent>
