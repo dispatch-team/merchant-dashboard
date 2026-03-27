@@ -53,11 +53,11 @@ export default function ShipmentsListPage() {
 
   const columns = [
     {
-      key: "id",
-      header: "Shipment ID",
+      key: "code",
+      header: "Code",
       render: (item: ShipmentResponse) => {
-        const idStr = String(item.id ?? "N/A");
-        return <span className="font-mono text-xs">{idStr.length > 8 ? idStr.slice(0, 8) + "..." : idStr}</span>;
+        const codeStr = String(item.code || item.id || "N/A");
+        return <span className="font-mono text-xs font-semibold">{codeStr}</span>;
       },
     },
     {

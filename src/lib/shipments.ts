@@ -12,6 +12,7 @@ export interface ShipmentPayload {
 
 export interface ShipmentResponse {
   id: string;
+  code?: string;
   status: string;
   courier_company_id: number;
   merchant_user_id: string;
