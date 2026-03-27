@@ -31,3 +31,30 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export async function GET(request: NextRequest) {
+  const authHeader = request.headers.get("authorization");
+  if (!authHeader) {
+    return NextResponse.json({ error: "missing_authorization" }, { status: 401 });
+  }
+
+  try {
+    const { searchParams } = new URL(request.url);
+    const queryString = searchParams.toString();
+    const fetchUrl = queryString ? `${SHIPMENTS_URL}?${queryString}` : SHIPMENTS_URL;
+
+    const res = await fetch(fetchUrl, {
+      headers: { Authorization: authHeader },
+      next: { revalidate: 0 },
+    });
+
+    const data = await res.json().catch(() => ({}));
+    return NextResponse.json(data, { status: res.status });
+  } catch (err) {
+    console.error("Failed to fetch shipments:", err);
+    return NextResponse.json(
+      { error: "network_error", message: "Unable to fetch shipments" },
+      { status: 500 }
+    );
+  }
+}

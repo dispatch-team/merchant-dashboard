@@ -15,6 +15,7 @@ import {
   Settings,
   User,
   Loader2,
+  List,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -58,6 +59,7 @@ const STAT_CARDS = [
 
 const QUICK_ACTIONS = [
   { label: "New Shipment", icon: Package, desc: "Create and dispatch a new order", path: "/merchant/shipments/new" },
+  { label: "View Shipments", icon: List, desc: "Track and manage your created shipments", path: "/merchant/shipments" },
   { label: "Browse Couriers", icon: Truck, desc: "Compare and select courier partners", path: "/merchant/couriers" },
   { label: "View Analytics", icon: BarChart3, desc: "Track performance and trends", path: "/merchant/analytics" },
 ];

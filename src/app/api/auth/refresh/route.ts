@@ -11,7 +11,16 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const res = await fetch(TOKEN_URL, {
+  if (TOKEN_URL.includes("undefined")) {
+    console.warn("auth/refresh: KEYCLOAK_URL is missing from environment. Cannot refresh token.");
+    return NextResponse.json(
+      { error: "server_error", error_description: "Missing Keycloak env variables" },
+      { status: 500 }
+    );
+  }
+
+  try {
+    const res = await fetch(TOKEN_URL, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
@@ -22,6 +31,13 @@ export async function POST(request: NextRequest) {
     }),
   });
 
-  const data = await res.json();
-  return NextResponse.json(data, { status: res.status });
+    const data = await res.json();
+    return NextResponse.json(data, { status: res.status });
+  } catch (err: any) {
+    console.error("Token refresh failed:", err);
+    return NextResponse.json(
+      { error: "network_error", error_description: err.message },
+      { status: 500 }
+    );
+  }
 }
