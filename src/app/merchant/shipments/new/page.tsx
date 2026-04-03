@@ -27,8 +27,6 @@ import { getAvailableCouriers, CourierProfile } from "@/lib/couriers";
 import { createShipment } from "@/lib/shipments";
 import { toast } from "sonner";
 import dispatchLogo from "@/assets/dispatch-logo.png";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 interface FormFields {
   courier_company_id: string;
@@ -309,10 +307,6 @@ export default function NewShipmentPage() {
                   Merchant / New Shipment
                 </span>
               </div>
-            </div>
-            <div className="flex items-center gap-1">
-              <LanguageSwitcher />
-              <ThemeToggle />
             </div>
           </div>
         </header>

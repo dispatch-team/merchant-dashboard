@@ -27,8 +27,11 @@ export interface AuthError {
 }
 
 function parseJwtPayload(token: string): Record<string, unknown> {
-  const base64 = token.split(".")[1];
-  const json = atob(base64.replace(/-/g, "+").replace(/_/g, "/"));
+  let base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+  while (base64.length % 4 !== 0) {
+    base64 += "=";
+  }
+  const json = atob(base64);
   return JSON.parse(json);
 }
 
@@ -171,8 +174,8 @@ const STORAGE_KEYS = {
 export function persistTokens(tokens: TokenResponse): void {
   localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, tokens.access_token);
   localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, tokens.refresh_token);
-  // Add cookie for API routes (like logo proxy)
-  document.cookie = `access_token=${tokens.access_token}; path=/; max-age=${tokens.expires_in}; SameSite=Lax`;
+  // Add cookie for API routes (like logo proxy) and middleware
+  document.cookie = `dispatch_access_token=${tokens.access_token}; path=/; max-age=${tokens.expires_in}; SameSite=Lax`;
 }
 
 export function getStoredTokens(): { accessToken: string | null; refreshToken: string | null } {
@@ -186,5 +189,5 @@ export function clearStoredTokens(): void {
   localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
   localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
   // Clear cookie
-  document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+  document.cookie = "dispatch_access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 }

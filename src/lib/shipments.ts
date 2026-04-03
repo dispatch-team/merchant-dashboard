@@ -24,6 +24,17 @@ export interface ShipmentResponse {
   webhook_url?: string;
   items?: string[];
   created_at?: string;
+  updated_at?: string;
+  total_fee?: number;
+  merchant?: {
+    company_name?: string;
+  };
+  courier_company?: {
+    company_name?: string;
+    company_address?: string;
+    phone_number?: string;
+    email?: string;
+  };
   [key: string]: unknown;
 }
 
@@ -89,4 +100,70 @@ export async function getShipments(
   }
 
   return data as ShipmentListResponse;
+}
+
+export interface ShipmentUpdatePayload {
+  courier_company_id?: number;
+  start_address?: string;
+  end_address?: string;
+  description?: string;
+  weight_kg?: number;
+  dimensions?: string;
+  webhook_url?: string;
+  items?: string[];
+  status?: string;
+}
+
+export async function getShipmentDetails(token: string, code: string): Promise<ShipmentResponse> {
+  const encodedCode = encodeURIComponent(code);
+  const res = await fetch(`/api/shipments/${encodedCode}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    const error = new Error(data?.message || data?.error || "Failed to fetch shipment details");
+    (error as any).status = res.status;
+    throw error;
+  }
+
+  return data as ShipmentResponse;
+}
+
+export async function updateShipment(
+  token: string,
+  code: string,
+  payload: ShipmentUpdatePayload
+): Promise<ShipmentResponse> {
+  const encodedCode = encodeURIComponent(code);
+  const res = await fetch(`/api/shipments/${encodedCode}`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    throw new Error(data?.message || data?.error || "Failed to update shipment");
+  }
+
+  return data as ShipmentResponse;
+}
+
+export async function deleteShipment(token: string, code: string): Promise<void> {
+  const encodedCode = encodeURIComponent(code);
+  const res = await fetch(`/api/shipments/${encodedCode}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data?.message || data?.error || "Failed to delete shipment");
+  }
 }

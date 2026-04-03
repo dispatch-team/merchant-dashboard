@@ -27,7 +27,11 @@ export function middleware(request: NextRequest) {
 
   // Validate token expiry (basic check without verifying signature)
   try {
-    const payload = JSON.parse(atob(accessToken.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+    let base64 = accessToken.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    while (base64.length % 4 !== 0) {
+      base64 += "=";
+    }
+    const payload = JSON.parse(atob(base64));
     if (Date.now() >= payload.exp * 1000) {
       return NextResponse.redirect(new URL(PROTECTED_ROUTES[matchedPrefix], request.url));
     }

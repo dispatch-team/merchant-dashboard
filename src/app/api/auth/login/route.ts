@@ -12,7 +12,6 @@ export async function POST(request: NextRequest) {
   }
 
   const loginUrl = "https://service.staging.dispattch.dev/api/v1/merchants/login";
-  console.log("[merchant login] POSTing to:", loginUrl, "username:", username);
 
   try {
     const res = await fetch(loginUrl, {
@@ -22,7 +21,9 @@ export async function POST(request: NextRequest) {
     });
 
     const raw = await res.text();
-    console.log("[merchant login] backend status:", res.status, "body:", raw);
+    if (!res.ok) {
+      console.error("[merchant login] backend error:", res.status);
+    }
 
     let data: unknown;
     try { data = JSON.parse(raw); } catch { data = {}; }

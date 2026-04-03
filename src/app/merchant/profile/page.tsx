@@ -14,54 +14,87 @@ import {
   Camera,
   Loader2,
   Save,
-  CheckCircle2,
-  AlertCircle
+  User
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { AuthGuard } from "@/components/AuthGuard";
 import { useAuth } from "@/context/AuthContext";
 import { useI18n } from "@/intl/IntlProvider";
 import { toast } from "sonner";
 import dispatchLogo from "@/assets/dispatch-logo.png";
+import {
+  type NormalizedMerchantProfile,
+  buildMerchantLogoProxyUrl,
+  mergeMerchantProfileWithJwtUser,
+  merchantApiErrorMessage,
+} from "@/lib/merchantProfile";
 
-interface MerchantProfile {
-  id: number;
-  company_name: string;
-  company_address: string;
-  industry: string;
-  description: string;
-  phone_number: string;
-  email: string;
-  website_url: string;
-  company_logo_id?: string;
-}
+const DEFAULT_MERCHANT_COUNTRY_CODE = "251";
+
+const formatPhoneNumberToE164 = (value: string | undefined) => {
+  const trimmed = value?.trim();
+  if (!trimmed) return "";
+  const digits = trimmed.replace(/\D+/g, "");
+  if (!digits) return "";
+
+  if (trimmed.startsWith("+")) {
+    return `+${digits}`;
+  }
+
+  if (trimmed.startsWith("00")) {
+    const withoutLeadingZeros = digits.replace(/^0+/, "");
+    return withoutLeadingZeros ? `+${withoutLeadingZeros}` : "";
+  }
+
+  if (digits.length >= 11) {
+    return `+${digits}`;
+  }
+
+  const localPart = digits.replace(/^0+/, "");
+  const normalizedLocal = localPart || digits;
+  return `+${DEFAULT_MERCHANT_COUNTRY_CODE}${normalizedLocal}`;
+};
 
 export default function ProfilePage() {
   const { user, getValidAccessToken } = useAuth();
   const t = useI18n("profile");
   const router = useRouter();
   
-  const [profile, setProfile] = useState<MerchantProfile | null>(null);
+  const [profile, setProfile] = useState<NormalizedMerchantProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // If user picked a new file locally → show data URL preview
+  // Otherwise → build the API URL and attach token query param for secure image fetch
+  const displayedLogoUrl =
+    logoPreview ??
+    buildMerchantLogoProxyUrl(profile?.company_logo_id, accessToken);
 
   useEffect(() => {
     fetchProfile();
   }, []);
 
+  useEffect(() => {
+    setProfile((p) => {
+      if (!p) return p;
+      if (p.first_name.trim() || p.last_name.trim()) return p;
+      return mergeMerchantProfileWithJwtUser(p, user);
+    });
+  }, [user?.sub, user?.given_name, user?.family_name, user?.name]);
+
   const fetchProfile = async () => {
     try {
       const token = await getValidAccessToken();
       if (!token) return;
+      setAccessToken(token);
 
       const res = await fetch("/api/merchant/profile", {
         headers: { Authorization: `Bearer ${token}` },
@@ -69,10 +102,13 @@ export default function ProfilePage() {
 
       if (res.ok) {
         const data = await res.json();
-        setProfile(data);
+        setProfile(mergeMerchantProfileWithJwtUser(data, user));
         if (data.company_logo_id) {
-          setLogoPreview(`/api/merchant/logo/${data.company_logo_id}`);
+          setLogoPreview(null);
         }
+      } else {
+        const body = await res.json().catch(() => ({}));
+        toast.error(merchantApiErrorMessage(body));
       }
     } catch (err) {
       console.error("Failed to fetch profile:", err);
@@ -106,6 +142,8 @@ export default function ProfilePage() {
       const formData = new FormData();
       
       const fields = [
+        "first_name",
+        "last_name",
         "company_name", 
         "company_address", 
         "industry", 
@@ -115,7 +153,11 @@ export default function ProfilePage() {
       ] as const;
 
       fields.forEach(field => {
-        const value = profile[field];
+        let value = profile[field];
+        if (field === "phone_number") {
+          value = formatPhoneNumberToE164(value);
+        }
+
         if (value && value.trim() !== "") {
           formData.append(field, value);
         }
@@ -123,6 +165,11 @@ export default function ProfilePage() {
       
       if (logoFile) {
         formData.append("company_logo", logoFile);
+      }
+
+      const email = (profile.email || user?.email || "").trim();
+      if (email) {
+        formData.append("email", email);
       }
 
       const res = await fetch("/api/merchant/profile", {
@@ -133,11 +180,11 @@ export default function ProfilePage() {
 
       if (res.ok) {
         toast.success(t("success"));
-        // Refresh profile to get updated logo ID if changed
+        setLogoFile(null);
         fetchProfile();
       } else {
-        const errorData = await res.json();
-        toast.error(errorData.message || t("error"));
+        const errorData = await res.json().catch(() => ({}));
+        toast.error(merchantApiErrorMessage(errorData) || t("error"));
       }
     } catch (err) {
       console.error("Failed to update profile:", err);
@@ -183,10 +230,6 @@ export default function ProfilePage() {
                 </span>
               </div>
             </div>
-            <div className="flex items-center gap-1">
-              <LanguageSwitcher />
-              <ThemeToggle />
-            </div>
           </div>
         </header>
 
@@ -201,17 +244,44 @@ export default function ProfilePage() {
             <Card className="border-border/40 bg-card/60 backdrop-blur-sm shadow-xl">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <Building2 className="h-5 w-5 text-primary" />
-                  Business Identity
+                  <User className="h-5 w-5 text-primary" />
+                  Profile Information
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-border/40 pb-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="first_name">First Name</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50" />
+                      <Input 
+                        id="first_name" 
+                        className="pl-9 bg-background/50"
+                        value={profile?.first_name || ""} 
+                        onChange={(e) => setProfile(p => p ? { ...p, first_name: e.target.value } : null)}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="last_name">Last Name</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50" />
+                      <Input 
+                        id="last_name" 
+                        className="pl-9 bg-background/50"
+                        value={profile?.last_name || ""} 
+                        onChange={(e) => setProfile(p => p ? { ...p, last_name: e.target.value } : null)}
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 {/* Logo Upload */}
-                <div className="flex flex-col sm:flex-row items-center gap-6 pb-4 border-b border-border/40">
+                <div className="flex flex-col sm:flex-row items-center gap-6 pb-4 border-b border-border/40 pt-4">
                   <div className="relative group">
                     <div className="w-24 h-24 rounded-2xl bg-primary/10 border-2 border-dashed border-primary/20 flex items-center justify-center overflow-hidden transition-all group-hover:border-primary/40">
-                      {logoPreview ? (
-                        <img src={logoPreview} alt="Logo Preview" className="w-full h-full object-cover" />
+                      {displayedLogoUrl ? (
+                        <img src={displayedLogoUrl} alt="Logo Preview" className="w-full h-full object-cover" />
                       ) : (
                         <Building2 className="h-10 w-10 text-primary/40" />
                       )}
@@ -257,7 +327,6 @@ export default function ProfilePage() {
                         className="pl-9 bg-background/50"
                         value={profile?.company_name || ""} 
                         onChange={(e) => setProfile(p => p ? { ...p, company_name: e.target.value } : null)}
-                        required
                       />
                     </div>
                   </div>
@@ -270,7 +339,6 @@ export default function ProfilePage() {
                         className="pl-9 bg-background/50"
                         value={profile?.industry || ""} 
                         onChange={(e) => setProfile(p => p ? { ...p, industry: e.target.value } : null)}
-                        required
                       />
                     </div>
                   </div>
@@ -285,7 +353,6 @@ export default function ProfilePage() {
                       className="pl-9 bg-background/50"
                       value={profile?.company_address || ""} 
                       onChange={(e) => setProfile(p => p ? { ...p, company_address: e.target.value } : null)}
-                      required
                     />
                   </div>
                 </div>
@@ -320,10 +387,12 @@ export default function ProfilePage() {
                       <Phone className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50" />
                       <Input 
                         id="phone_number" 
+                        type="tel"
+                        inputMode="tel"
+                        placeholder="+251 9xx xxx xxx"
                         className="pl-9 bg-background/50"
                         value={profile?.phone_number || ""} 
                         onChange={(e) => setProfile(p => p ? { ...p, phone_number: e.target.value } : null)}
-                        required
                       />
                     </div>
                   </div>
