@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -23,7 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AuthGuard } from "@/components/AuthGuard";
 import { useAuth } from "@/context/AuthContext";
-import { getAvailableCouriers, CourierProfile } from "@/lib/couriers";
+import { getPartnerCouriers, CourierProfile } from "@/lib/couriers";
 import { createShipment } from "@/lib/shipments";
 import { toast } from "sonner";
 import dispatchLogo from "@/assets/dispatch-logo.png";
@@ -84,8 +85,9 @@ function validate(
 ): FormErrors {
   const errors: FormErrors = {};
 
-  if (!fields.courier_company_id)
-    errors.courier_company_id = "Please select a courier.";
+  if (!fields.courier_company_id || parseInt(fields.courier_company_id, 10) <= 0)
+    errors.courier_company_id = "Please select a valid partner courier.";
+
 
   if (!fields.start_address.trim())
     errors.start_address = "Pickup address is required.";
@@ -139,16 +141,18 @@ export default function NewShipmentPage() {
     status: string;
   } | null>(null);
 
-  // Load couriers on mount
+  // Load partner couriers only (merchants may ship via partnered carriers)
   useEffect(() => {
     async function fetchCouriers() {
       try {
         const token = await getValidAccessToken();
         if (!token) return;
-        const data = await getAvailableCouriers(token);
+        const data = await getPartnerCouriers(token);
         setCouriers(data || []);
-      } catch (err: any) {
-        setCouriersError(err.message || "Failed to load couriers.");
+      } catch (err: unknown) {
+        const message =
+          err instanceof Error ? err.message : "Failed to load partner couriers.";
+        setCouriersError(message);
       } finally {
         setCouriersLoading(false);
       }
@@ -253,14 +257,17 @@ export default function NewShipmentPage() {
             .filter(Boolean)
         : [];
 
+      const courierId = parseInt(fields.courier_company_id, 10);
       const payload: Record<string, unknown> = {
-        courier_company_id: parseInt(fields.courier_company_id, 10),
+        courier_company_id: courierId,
+        CourierCompanyID: courierId, // Extra safety: some backend versions expect PascalCase
         merchant_user_id: user?.sub ?? "",
         start_address: fields.start_address.trim(),
         end_address: fields.end_address.trim(),
         description: fullDescription,
         items,
       };
+
 
       if (fields.weight_kg) payload.weight_kg = parseFloat(fields.weight_kg);
       if (fields.dimensions.trim()) payload.dimensions = fields.dimensions.trim();
@@ -382,12 +389,12 @@ export default function NewShipmentPage() {
                 <FormSection title="Courier" icon={<Truck className="h-4 w-4 text-primary" />}>
                   <div>
                     <label className="block text-xs font-medium text-muted-foreground mb-1.5">
-                      Select Courier <span className="text-destructive">*</span>
+                      Partner courier <span className="text-destructive">*</span>
                     </label>
                     {couriersLoading ? (
                       <div className="flex items-center gap-2 h-10 px-3 rounded-xl border border-border/40 bg-background/40">
                         <Loader2 className="h-4 w-4 animate-spin text-muted-foreground/50" />
-                        <span className="text-sm text-muted-foreground/60">Loading couriers…</span>
+                        <span className="text-sm text-muted-foreground/60">Loading partner couriers…</span>
                       </div>
                     ) : couriersError ? (
                       <div className="flex items-center gap-2 h-10 px-3 rounded-xl border border-destructive/30 bg-destructive/5">
@@ -395,26 +402,45 @@ export default function NewShipmentPage() {
                         <span className="text-sm text-destructive/80">{couriersError}</span>
                       </div>
                     ) : (
-                      <div className="relative">
-                        <select
-                          name="courier_company_id"
-                          value={fields.courier_company_id}
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                          className={`w-full appearance-none h-10 pl-3 pr-10 rounded-xl border text-sm bg-background/40 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/30 ${
-                            errors.courier_company_id
-                              ? "border-destructive/50 bg-destructive/5"
-                              : "border-border/40 focus:border-primary/40"
-                          }`}
-                        >
-                          <option value="">-- Choose a courier --</option>
-                          {couriers.map((c) => (
-                            <option key={c.id} value={String(c.id)}>
-                              {c.company_name} — max {c.max_weight} kg
+                      <div className="space-y-2">
+                        <div className="relative">
+                          <select
+                            name="courier_company_id"
+                            value={fields.courier_company_id}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            disabled={couriers.length === 0}
+                            className={`w-full appearance-none h-10 pl-3 pr-10 rounded-xl border text-sm bg-background/40 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-60 ${
+                              errors.courier_company_id
+                                ? "border-destructive/50 bg-destructive/5"
+                                : "border-border/40 focus:border-primary/40"
+                            }`}
+                          >
+                            <option value="">
+                              {couriers.length === 0
+                                ? "No partner couriers yet"
+                                : "-- Choose a partner courier --"}
                             </option>
-                          ))}
-                        </select>
-                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50 pointer-events-none" />
+                            {couriers.map((c) => (
+                              <option key={c.id} value={String(c.id)}>
+                                {c.company_name} — max {c.max_weight} kg
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50 pointer-events-none" />
+                        </div>
+                        {couriers.length === 0 ? (
+                          <p className="text-xs text-muted-foreground leading-relaxed">
+                            Add carriers as partners on the{" "}
+                            <Link
+                              href="/merchant/couriers"
+                              className="font-medium text-primary underline-offset-2 hover:underline"
+                            >
+                              Couriers
+                            </Link>{" "}
+                            page to assign shipments to them.
+                          </p>
+                        ) : null}
                       </div>
                     )}
                     <FieldError message={errors.courier_company_id} />
@@ -571,7 +597,7 @@ export default function NewShipmentPage() {
                 </Button>
                 <Button
                   type="submit"
-                  disabled={isSubmitting || couriersLoading}
+                  disabled={isSubmitting || couriersLoading || couriers.length === 0}
                   className="gap-2 min-w-[150px] shadow-lg shadow-primary/20 hover:shadow-primary/30"
                 >
                   {isSubmitting ? (

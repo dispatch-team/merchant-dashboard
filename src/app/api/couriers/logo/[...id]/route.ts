@@ -10,14 +10,13 @@ export async function GET(
 
   let token = "";
   const authHeader = request.headers.get("authorization");
-  if (authHeader && authHeader.startsWith("Bearer ")) {
-    token = authHeader.split("Bearer ")[1];
+  if (authHeader?.startsWith("Bearer ")) {
+    token = authHeader.slice(7);
   } else {
-    const cookie = request.headers.get("cookie") || "";
-    token = cookie
-      .split("; ")
-      .find((c) => c.startsWith("access_token="))
-      ?.split("=")[1] || "";
+    token =
+      request.cookies.get("dispatch_access_token")?.value ||
+      request.nextUrl.searchParams.get("token") ||
+      "";
   }
 
   if (!token) {
