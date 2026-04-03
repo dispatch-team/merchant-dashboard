@@ -1,8 +1,10 @@
 export interface APIKeyMetadata {
-  id: string;
-  name?: string;
-  status: string;
-  created_at: string;
+  ID: number;
+  CreatedAt: string;
+  UpdatedAt: string;
+  DeletedAt: string | null;
+  merchant_id: number;
+  last_used_at: string;
 }
 
 export interface GeneratedAPIKey {

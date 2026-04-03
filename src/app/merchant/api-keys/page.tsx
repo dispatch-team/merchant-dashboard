@@ -97,29 +97,47 @@ export default function APIKeysPage() {
 
   const columns: any[] = [
     {
-      key: "id",
+      key: "ID",
       header: "Key ID",
       render: (item: APIKeyMetadata) => (
         <span className="font-mono text-[10px] text-muted-foreground uppercase opacity-70">
-          {item.id}
+          #{item.ID}
         </span>
       ),
     },
     {
       key: "status",
       header: "Status",
-      render: (item: APIKeyMetadata) => (
-        <Badge variant={item.status === "active" ? "default" : "secondary"} className="capitalize h-5 px-2 text-[10px]">
-          {item.status}
-        </Badge>
-      ),
+      render: (item: APIKeyMetadata) => {
+        const isRevoked = !!item.DeletedAt;
+        return (
+          <Badge 
+            variant={isRevoked ? "destructive" : "default"} 
+            className="capitalize h-5 px-2 text-[10px]"
+          >
+            {isRevoked ? "revoked" : "active"}
+          </Badge>
+        );
+      },
     },
     {
-      key: "created_at",
+      key: "last_used_at",
+      header: "Last Used",
+      render: (item: APIKeyMetadata) => {
+        const neverUsed = item.last_used_at.startsWith("0001-01-01");
+        return (
+          <span className="text-[11px] text-muted-foreground">
+            {neverUsed ? "Never" : new Date(item.last_used_at).toLocaleString()}
+          </span>
+        );
+      },
+    },
+    {
+      key: "CreatedAt",
       header: "Created",
       render: (item: APIKeyMetadata) => (
         <span className="text-[11px] text-muted-foreground">
-          {new Date(item.created_at).toLocaleString()}
+          {new Date(item.CreatedAt).toLocaleString()}
         </span>
       ),
     },
@@ -193,7 +211,7 @@ export default function APIKeysPage() {
           <DataTable
             columns={columns}
             data={keys as any}
-            keyExtractor={(item: any) => item.id}
+            keyExtractor={(item: any) => item.ID}
             emptyMessage={isLoading ? "Loading keys..." : "No API keys found. Generate one to get started."}
           />
         </div>
