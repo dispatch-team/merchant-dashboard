@@ -38,9 +38,9 @@ interface FormFields {
   description: string;
   weight_kg: string;
   dimensions: string;
-  webhook_url: string;
   items: string;
 }
+
 
 interface FormErrors {
   courier_company_id?: string;
@@ -50,8 +50,8 @@ interface FormErrors {
   recipient_phone?: string;
   description?: string;
   weight_kg?: string;
-  webhook_url?: string;
 }
+
 
 const INITIAL_FIELDS: FormFields = {
   courier_company_id: "",
@@ -62,9 +62,9 @@ const INITIAL_FIELDS: FormFields = {
   description: "",
   weight_kg: "",
   dimensions: "",
-  webhook_url: "",
   items: "",
 };
+
 
 function isValidUrl(url: string) {
   try {
@@ -116,9 +116,7 @@ function validate(
     }
   }
 
-  if (fields.webhook_url && !isValidUrl(fields.webhook_url)) {
-    errors.webhook_url = "Enter a valid URL (e.g. https://example.com).";
-  }
+
 
   return errors;
 }
@@ -271,7 +269,7 @@ export default function NewShipmentPage() {
 
       if (fields.weight_kg) payload.weight_kg = parseFloat(fields.weight_kg);
       if (fields.dimensions.trim()) payload.dimensions = fields.dimensions.trim();
-      if (fields.webhook_url.trim()) payload.webhook_url = fields.webhook_url.trim();
+
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = await createShipment(token, payload as any);
@@ -568,20 +566,7 @@ export default function NewShipmentPage() {
                   </div>
                 </FormSection>
 
-                {/* ── Section: Advanced (optional) ── */}
-                <FormSection title="Advanced" icon={<Link2 className="h-4 w-4 text-primary" />} collapsible>
-                  <FormField
-                    label="Webhook URL"
-                    name="webhook_url"
-                    placeholder="https://your-server.com/webhook"
-                    icon={<Link2 className="h-3.5 w-3.5" />}
-                    value={fields.webhook_url}
-                    error={errors.webhook_url}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    hint="Receive shipment status updates at this URL. Optional."
-                  />
-                </FormSection>
+
               </div>
 
               {/* ── Submit ── */}

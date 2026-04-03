@@ -389,24 +389,33 @@ export default function CourierDetailPage({ params }: CourierDetailPageProps) {
         </div>
       </section>
 
-      <Card className="border-border/40 bg-card/60 backdrop-blur-md">
+      <Card className={cn("border-border/40 bg-card/60 backdrop-blur-md transition-opacity", !isPartner && "opacity-60")}>
         <CardHeader>
           <CardTitle className="text-lg">Rate courier company</CardTitle>
           <CardDescription>
-            Use 1–5 stars (each star counts as 2 points on our 10-point scale).
+            {isPartner 
+              ? "Use 1–5 stars (each star counts as 2 points on our 10-point scale)."
+              : "Only partnered couriers can be rated by a merchant."}
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="relative space-y-6">
+          {!isPartner && (
+            <div 
+              className="absolute inset-0 z-10 cursor-not-allowed" 
+              onClick={() => toast.error("Only partnered couriers can be rated.")}
+              title="Only partnered couriers can be rated"
+            />
+          )}
           <StarRatingInput
             value={ratingStars}
             onChange={setRatingStars}
-            disabled={ratingSubmitting}
+            disabled={ratingSubmitting || !isPartner}
           />
           <div className="flex flex-wrap items-center gap-3">
             <Button
               type="button"
               className="rounded-xl"
-              disabled={ratingStars < 1 || ratingSubmitting}
+              disabled={ratingStars < 1 || ratingSubmitting || !isPartner}
               onClick={handleSubmitRating}
             >
               {ratingSubmitting ? (
@@ -418,7 +427,7 @@ export default function CourierDetailPage({ params }: CourierDetailPageProps) {
                 "Submit rating"
               )}
             </Button>
-            {ratingStars > 0 ? (
+            {isPartner && ratingStars > 0 ? (
               <span className="text-sm text-muted-foreground">
                 Sends <span className="font-semibold text-foreground">{ratingStars * 2}</span> / 10
                 to the server
@@ -427,6 +436,7 @@ export default function CourierDetailPage({ params }: CourierDetailPageProps) {
           </div>
         </CardContent>
       </Card>
+
     </div>
   );
 }
