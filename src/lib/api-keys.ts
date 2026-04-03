@@ -51,3 +51,14 @@ export async function verifyAPIKey(token: string, apiKey: string): Promise<{ is_
   }
   return res.json();
 }
+
+export async function deleteAPIKey(token: string, id: number): Promise<void> {
+  const res = await fetch(`/api/merchant/api-keys/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok && res.status !== 204) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.error_description || "Failed to delete API key");
+  }
+}

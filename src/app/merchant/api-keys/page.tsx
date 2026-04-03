@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/DataTable";
 import { useAuth } from "@/context/AuthContext";
-import { getAPIKeys, generateAPIKey, verifyAPIKey, APIKeyMetadata, GeneratedAPIKey } from "@/lib/api-keys";
+import { getAPIKeys, generateAPIKey, verifyAPIKey, deleteAPIKey, APIKeyMetadata, GeneratedAPIKey } from "@/lib/api-keys";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Dialog,
@@ -39,6 +39,11 @@ export default function APIKeysPage() {
   const [verifyKeyInput, setVerifyKeyInput] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationResult, setVerificationResult] = useState<{ is_valid: boolean } | null>(null);
+
+  // Deletion State
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [keyToDelete, setKeyToDelete] = useState<APIKeyMetadata | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchKeys = useCallback(async () => {
     setIsLoading(true);
@@ -112,6 +117,31 @@ export default function APIKeysPage() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!keyToDelete) return;
+    setIsDeleting(true);
+    try {
+      const token = await getValidAccessToken();
+      if (!token) return;
+      await deleteAPIKey(token, keyToDelete.ID);
+      toast({
+        title: "API Key Deleted",
+        description: `Key #${keyToDelete.ID} was removed successfully.`,
+      });
+      setIsDeleteConfirmOpen(false);
+      fetchKeys(); // Refresh the list
+    } catch (err: any) {
+      console.error("Failed to delete API key:", err);
+      toast({
+        variant: "destructive",
+        title: "Deletion Failed",
+        description: err.message || "Could not delete the API key.",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const copyToClipboard = () => {
     if (newKey?.api_key) {
       navigator.clipboard.writeText(newKey.api_key);
@@ -175,20 +205,36 @@ export default function APIKeysPage() {
       header: "Actions",
       className: "text-right",
       render: (item: APIKeyMetadata) => (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 text-[10px] font-bold uppercase tracking-wider gap-2 hover:bg-primary/10 hover:text-primary transition-colors rounded-xl"
-          onClick={(e) => {
-            e.stopPropagation();
-            setVerifyKeyInput("");
-            setVerificationResult(null);
-            setIsVerifyDialogOpen(true);
-          }}
-        >
-          <ShieldCheck className="h-3 w-3" />
-          Verify
-        </Button>
+        <div className="flex items-center justify-end gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 text-[10px] font-bold uppercase tracking-wider gap-2 hover:bg-primary/10 hover:text-primary transition-colors rounded-xl"
+            onClick={(e) => {
+              e.stopPropagation();
+              setVerifyKeyInput("");
+              setVerificationResult(null);
+              setIsVerifyDialogOpen(true);
+            }}
+          >
+            <ShieldCheck className="h-3 w-3" />
+            Verify
+          </Button>
+          {!item.DeletedAt && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive transition-colors rounded-xl"
+              onClick={(e) => {
+                e.stopPropagation();
+                setKeyToDelete(item);
+                setIsDeleteConfirmOpen(true);
+              }}
+            >
+              <Key className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       ),
     },
   ];
@@ -395,6 +441,42 @@ export default function APIKeysPage() {
             >
               {isVerifying ? <RefreshCcw className="h-4 w-4 animate-spin mr-2" /> : null}
               {isVerifying ? "Verifying..." : "Check Validity"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
+        <DialogContent className="sm:max-w-sm rounded-[2rem] border-border/50 bg-background/95 backdrop-blur-2xl shadow-2xl overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-destructive/5 to-transparent pointer-events-none" />
+          
+          <DialogHeader className="pt-2 relative z-10">
+            <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center text-destructive">
+                <AlertTriangle className="h-6 w-6" />
+            </div>
+            <DialogTitle className="text-center text-2xl font-bold text-destructive">Delete API Key</DialogTitle>
+            <DialogDescription className="text-center pt-2">
+              Are you sure you want to delete Key <span className="font-mono font-bold">#{keyToDelete?.ID}</span>? This action is permanent and cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="mt-6 flex flex-col gap-3 relative z-10">
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="w-full rounded-xl h-12 font-semibold shadow-lg shadow-destructive/20"
+            >
+              {isDeleting ? <RefreshCcw className="h-4 w-4 animate-spin mr-2" /> : null}
+              {isDeleting ? "Deleting..." : "Permanently Delete"}
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => setIsDeleteConfirmOpen(false)}
+              className="w-full rounded-xl h-12 font-semibold hover:bg-muted/50"
+            >
+              Cancel
             </Button>
           </div>
         </DialogContent>
