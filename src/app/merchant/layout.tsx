@@ -14,6 +14,7 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
+  Key,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import dispatchLogo from "@/assets/dispatch-logo.png";
@@ -26,6 +27,7 @@ const NAV_ITEMS = [
   { label: "Dashboard", href: "/merchant", icon: Package },
   { label: "Shipments", href: "/merchant/shipments", icon: List },
   { label: "Couriers", href: "/merchant/couriers", icon: Truck },
+  { label: "API Keys", href: "/merchant/api-keys", icon: Key },
 ];
 
 export default function MerchantLayout({ children }: { children: React.ReactNode }) {
