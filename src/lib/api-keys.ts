@@ -35,3 +35,19 @@ export async function generateAPIKey(token: string): Promise<GeneratedAPIKey> {
   }
   return res.json();
 }
+
+export async function verifyAPIKey(token: string, apiKey: string): Promise<{ is_valid: boolean }> {
+  const res = await fetch("/api/merchant/api-keys/verify", {
+    method: "POST",
+    headers: { 
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ api_key: apiKey }),
+  });
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.error_description || "Failed to verify API key");
+  }
+  return res.json();
+}

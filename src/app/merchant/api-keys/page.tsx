@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/DataTable";
 import { useAuth } from "@/context/AuthContext";
-import { getAPIKeys, generateAPIKey, APIKeyMetadata, GeneratedAPIKey } from "@/lib/api-keys";
+import { getAPIKeys, generateAPIKey, verifyAPIKey, APIKeyMetadata, GeneratedAPIKey } from "@/lib/api-keys";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Dialog,
@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 export default function APIKeysPage() {
   const { getValidAccessToken } = useAuth();
@@ -31,6 +33,12 @@ export default function APIKeysPage() {
   const [newKey, setNewKey] = useState<GeneratedAPIKey | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [hasCopied, setHasCopied] = useState(false);
+
+  // Verification State
+  const [isVerifyDialogOpen, setIsVerifyDialogOpen] = useState(false);
+  const [verifyKeyInput, setVerifyKeyInput] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verificationResult, setVerificationResult] = useState<{ is_valid: boolean } | null>(null);
 
   const fetchKeys = useCallback(async () => {
     setIsLoading(true);
@@ -80,6 +88,27 @@ export default function APIKeysPage() {
       });
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleVerify = async () => {
+    if (!verifyKeyInput.trim()) return;
+    setIsVerifying(true);
+    setVerificationResult(null);
+    try {
+      const token = await getValidAccessToken();
+      if (!token) return;
+      const result = await verifyAPIKey(token, verifyKeyInput);
+      setVerificationResult(result);
+    } catch (err: any) {
+      console.error("Failed to verify API key:", err);
+      toast({
+        variant: "destructive",
+        title: "Verification Error",
+        description: err.message || "Could not verify the API key.",
+      });
+    } finally {
+      setIsVerifying(false);
     }
   };
 
@@ -139,6 +168,27 @@ export default function APIKeysPage() {
         <span className="text-[11px] text-muted-foreground">
           {new Date(item.CreatedAt).toLocaleString()}
         </span>
+      ),
+    },
+    {
+      key: "actions",
+      header: "Actions",
+      className: "text-right",
+      render: (item: APIKeyMetadata) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 text-[10px] font-bold uppercase tracking-wider gap-2 hover:bg-primary/10 hover:text-primary transition-colors rounded-xl"
+          onClick={(e) => {
+            e.stopPropagation();
+            setVerifyKeyInput("");
+            setVerificationResult(null);
+            setIsVerifyDialogOpen(true);
+          }}
+        >
+          <ShieldCheck className="h-3 w-3" />
+          Verify
+        </Button>
       ),
     },
   ];
@@ -276,6 +326,77 @@ export default function APIKeysPage() {
               I've saved the key
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {/* Verification Dialog */}
+      <Dialog open={isVerifyDialogOpen} onOpenChange={setIsVerifyDialogOpen}>
+        <DialogContent className="sm:max-w-md rounded-[2rem] border-border/50 bg-background/95 backdrop-blur-2xl shadow-2xl overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
+          
+          <DialogHeader className="pt-2 relative z-10">
+            <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                <Key className="h-6 w-6" />
+            </div>
+            <DialogTitle className="text-center text-2xl font-bold">Verify API Key</DialogTitle>
+            <DialogDescription className="text-center pt-2">
+              Paste an API key string below to check if it is still valid and active.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="mt-4 space-y-6 relative z-10">
+            <div className="space-y-2">
+              <label htmlFor="verify-key" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-1">API Key String</label>
+              <Input
+                id="verify-key"
+                placeholder="dsp_..."
+                value={verifyKeyInput}
+                onChange={(e) => {
+                  setVerifyKeyInput(e.target.value);
+                  setVerificationResult(null);
+                }}
+                className="font-mono text-sm bg-muted/30 border-border/50 rounded-xl h-12 focus-visible:ring-primary/30"
+              />
+            </div>
+
+            {verificationResult && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className={cn(
+                  "rounded-2xl p-4 flex items-center gap-4 border",
+                  verificationResult.is_valid 
+                    ? "bg-green-500/10 border-green-500/20 text-green-500" 
+                    : "bg-destructive/10 border-destructive/20 text-destructive"
+                )}
+              >
+                <div className={cn(
+                  "h-10 w-10 rounded-full flex items-center justify-center shrink-0",
+                  verificationResult.is_valid ? "bg-green-500/20" : "bg-destructive/20"
+                )}>
+                  {verificationResult.is_valid ? <Check className="h-5 w-5" /> : <AlertTriangle className="h-5 w-5" />}
+                </div>
+                <div>
+                  <p className="text-sm font-bold">
+                    {verificationResult.is_valid ? "Key is Valid" : "Invalid Key"}
+                  </p>
+                  <p className="text-[11px] opacity-80">
+                    {verificationResult.is_valid 
+                      ? "This API key is active and can be used for integrations." 
+                      : "This key is either incorrect or has been revoked."}
+                  </p>
+                </div>
+              </motion.div>
+            )}
+
+            <Button
+              onClick={handleVerify}
+              disabled={isVerifying || !verifyKeyInput.trim()}
+              className="w-full rounded-xl h-12 font-semibold shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90"
+            >
+              {isVerifying ? <RefreshCcw className="h-4 w-4 animate-spin mr-2" /> : null}
+              {isVerifying ? "Verifying..." : "Check Validity"}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
