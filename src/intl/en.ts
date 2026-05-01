@@ -293,8 +293,6 @@ const en = {
       carrier: "Carrier partner",
       details: "Package details",
       contents: "Contents",
-      fee: "Delivery fee",
-      currency: "ETB",
       noShipments: "No shipments yet",
       noShipmentsSubtitle: "Your latest shipment will appear here once created.",
       createFirst: "Create your first shipment",
@@ -551,17 +549,20 @@ const en = {
     },
   },
 
-  // ─── Supervisor & Admin Portals ───────────────────────────────────────────
-  supervisor: {
-    title: "Courier Supervisor Dashboard",
-    welcome: "Welcome to the streamlined Dispatch Supervisor portal.",
+  // ─── Dashboards (Admin & Supervisor) ──────────────────────────────────────
+  dashboards: {
+    admin: {
+      title: "Administrator Dashboard",
+      welcome: "Welcome to the streamlined Dispatch Administration portal.",
+    },
+    supervisor: {
+      title: "Courier Supervisor Dashboard",
+      welcome: "Welcome to the streamlined Dispatch Supervisor portal.",
+    },
+    returnToWebsite: "Return to Website",
+    logout: "Sign Out",
   },
-  admin: {
-    title: "Administrator Dashboard",
-    welcome: "Welcome to the streamlined Dispatch Administration portal.",
-  },
-  returnToWebsite: "Return to Website",
-  logout: "Sign Out",
+
 
   // ─── Common ─────────────────────────────────────────────────────────────────
   common: {

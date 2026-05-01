@@ -293,8 +293,6 @@ const am: Messages = {
       carrier: "ኩሪየር አጋር",
       details: "የጥቅል ዝርዝሮች",
       contents: "ይዘቶች",
-      fee: "የማድረሻ ክፍያ",
-      currency: "ብር",
       noShipments: "እስካሁን ምንም ጭነቶች የሉም",
       noShipmentsSubtitle: "ጭነት ሲፈጠር የቅርብ ጊዜ ጭነትዎ እዚህ ይታያል።",
       createFirst: "የመጀመሪያዎን ጭነት ይፍጠሩ",
@@ -551,17 +549,20 @@ const am: Messages = {
     },
   },
 
-  // ─── Supervisor & Admin Portals ───────────────────────────────────────────
-  supervisor: {
-    title: "የኩሪየር ተቆጣጣሪ ዳሽቦርድ",
-    welcome: "ወደ Dispatch የተቆጣጣሪ መግቢያ እንኳን ደህና ተመለሱ።",
+  // ─── Dashboards (Admin & Supervisor) ──────────────────────────────────────
+  dashboards: {
+    admin: {
+      title: "የአስተዳዳሪ ዳሽቦርድ",
+      welcome: "ወደ Dispatch አስተዳደር መግቢያ እንኳን ደህና ተመለሱ።",
+    },
+    supervisor: {
+      title: "የኩሪየር ተቆጣጣሪ ዳሽቦርድ",
+      welcome: "ወደ Dispatch የተቆጣጣሪ መግቢያ እንኳን ደህና ተመለሱ።",
+    },
+    returnToWebsite: "ወደ ድህረ-ገጹ ተመለስ",
+    logout: "ውጣ",
   },
-  admin: {
-    title: "የአስተዳዳሪ ዳሽቦርድ",
-    welcome: "ወደ Dispatch አስተዳደር መግቢያ እንኳን ደህና ተመለሱ።",
-  },
-  returnToWebsite: "ወደ ድህረ-ገጹ ተመለስ",
-  logout: "ውጣ",
+
 
   // ─── Common ─────────────────────────────────────────────────────────────────
   common: {
