@@ -31,6 +31,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { useI18n } from "@/intl";
 
 function filterCouriers(list: CourierProfile[], query: string): CourierProfile[] {
   const q = query.trim().toLowerCase();
@@ -43,6 +44,8 @@ function filterCouriers(list: CourierProfile[], query: string): CourierProfile[]
 }
 
 export default function CouriersPage() {
+  const t = useI18n("couriers");
+  const tNav = useI18n("nav_merchant");
   const { getValidAccessToken } = useAuth();
   const [availableCouriers, setAvailableCouriers] = useState<CourierProfile[]>([]);
   const [partnerCouriers, setPartnerCouriers] = useState<CourierProfile[]>([]);
@@ -55,7 +58,7 @@ export default function CouriersPage() {
     try {
       const token = await getValidAccessToken();
       if (!token) {
-        toast.error("Unable to authenticate courier network");
+        toast.error(t("errorAuth"));
         return;
       }
 
@@ -68,7 +71,7 @@ export default function CouriersPage() {
       setPartnerCouriers(partners || []);
     } catch (err: unknown) {
       console.error("Failed to fetch couriers:", err);
-      const message = err instanceof Error ? err.message : "Failed to load couriers";
+      const message = err instanceof Error ? err.message : t("errorLoad");
       toast.error(message);
     } finally {
       setIsLoading(false);
@@ -98,10 +101,10 @@ export default function CouriersPage() {
   );
 
   const stats = [
-    { label: "Couriers in network", value: availableCouriers.length },
-    { label: "Your partners", value: partnerCouriers.length },
+    { label: t("stats.network"), value: availableCouriers.length },
+    { label: t("stats.partners"), value: partnerCouriers.length },
     {
-      label: "Not partnered yet",
+      label: t("stats.notPartnered"),
       value: Math.max(0, availableCouriers.length - partnerIds.size),
     },
   ];
@@ -112,17 +115,17 @@ export default function CouriersPage() {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.4em] text-muted-foreground/80">
-              Couriers
+              {tNav("couriers")}
             </p>
-            <h1 className="text-3xl font-semibold">Courier partnerships</h1>
+            <h1 className="text-3xl font-semibold">{t("title")}</h1>
             <p className="text-sm text-muted-foreground">
-              Discover delivery networks and manage partners across Addis Ababa.
+              {t("subtitle")}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <div className="flex items-center gap-1 rounded-2xl border border-border/30 bg-background/60 backdrop-blur-md px-2 py-1.5">
               <Input
-                placeholder="Search couriers…"
+                placeholder={t("searchPlaceholder")}
                 className="h-9 min-w-[180px] max-w-[240px] border-0 bg-transparent text-sm placeholder:text-muted-foreground/70 focus-visible:ring-0"
                 value={draftQuery}
                 onChange={(e) => setDraftQuery(e.target.value)}
@@ -138,7 +141,7 @@ export default function CouriersPage() {
                 size="icon"
                 variant="ghost"
                 className="h-9 w-9 shrink-0 rounded-xl text-muted-foreground hover:text-foreground"
-                aria-label="Search couriers"
+                aria-label={t("searchLabel")}
                 onClick={applySearch}
               >
                 <Search className="h-4 w-4" />
@@ -149,7 +152,7 @@ export default function CouriersPage() {
               className="flex items-center gap-2 rounded-2xl bg-white/5 px-3 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-muted-foreground transition hover:bg-white/10"
             >
               <Filter className="h-4 w-4" />
-              Filters
+              {t("filters")}
             </button>
           </div>
         </div>
@@ -177,19 +180,19 @@ export default function CouriersPage() {
               className="flex-1 gap-2 rounded-xl data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:shadow-sm"
             >
               <LayoutGrid className="h-4 w-4" />
-              All couriers
+              {t("tabs.all")}
             </TabsTrigger>
             <TabsTrigger
               value="partners"
               className="flex-1 gap-2 rounded-xl data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:shadow-sm"
             >
               <Users className="h-4 w-4" />
-              Partners
+              {t("tabs.partners")}
             </TabsTrigger>
           </TabsList>
           {appliedQuery ? (
             <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground/70">
-              Filter: &ldquo;{appliedQuery}&rdquo;
+              {t("filterActive", { query: appliedQuery })}
             </p>
           ) : null}
         </div>
@@ -198,15 +201,15 @@ export default function CouriersPage() {
           <div className="flex items-center justify-between text-xs uppercase tracking-[0.4em] text-muted-foreground/70">
             <div className="flex items-center gap-2">
               <ShieldCheck className="h-4 w-4 text-muted-foreground" />
-              <span>Available couriers</span>
+              <span>{t("availableCouriers")}</span>
             </div>
-            <span>{filteredAvailable.length} results</span>
+            <span>{t("results", { count: String(filteredAvailable.length) })}</span>
           </div>
 
           {isLoading ? (
             <div className="flex items-center justify-center rounded-3xl border border-border/30 bg-card/60 p-12 text-sm text-muted-foreground">
               <Loader2 className="mr-2 h-4 w-4 animate-spin text-primary" />
-              Connecting to courier network...
+              {t("connecting")}
             </div>
           ) : (
             <div className="grid gap-5 lg:grid-cols-2">
@@ -223,8 +226,8 @@ export default function CouriersPage() {
           {!isLoading && filteredAvailable.length === 0 && (
             <div className="rounded-3xl border border-dashed border-border/40 bg-card/60 p-6 text-sm text-muted-foreground">
               {appliedQuery
-                ? "No couriers match your search. Change the query and press the search button."
-                : "No couriers are available right now."}
+                ? t("noResultsSearch")
+                : t("noResultsAvailable")}
             </div>
           )}
         </TabsContent>
@@ -233,15 +236,15 @@ export default function CouriersPage() {
           <div className="flex items-center justify-between text-xs uppercase tracking-[0.4em] text-muted-foreground/70">
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-muted-foreground" />
-              <span>Partner couriers</span>
+              <span>{t("partnerCouriers")}</span>
             </div>
-            <span>{filteredPartners.length} results</span>
+            <span>{t("results", { count: String(filteredPartners.length) })}</span>
           </div>
 
           {isLoading ? (
             <div className="flex items-center justify-center rounded-3xl border border-border/30 bg-card/60 p-12 text-sm text-muted-foreground">
               <Loader2 className="mr-2 h-4 w-4 animate-spin text-primary" />
-              Loading partners...
+              {t("loadingPartners")}
             </div>
           ) : (
             <div className="grid gap-5 lg:grid-cols-2">
@@ -254,8 +257,8 @@ export default function CouriersPage() {
           {!isLoading && filteredPartners.length === 0 && (
             <div className="rounded-3xl border border-dashed border-border/40 bg-card/60 p-6 text-sm text-muted-foreground">
               {appliedQuery
-                ? "No partners match your search. Change the query and press search."
-                : "You have not added any courier partners yet. Browse all couriers to add one."}
+                ? t("noResultsSearch")
+                : t("noResultsPartners")}
             </div>
           )}
         </TabsContent>
@@ -271,6 +274,8 @@ function CourierCard({
   courier: CourierProfile;
   isPartner: boolean;
 }) {
+  const t = useI18n("couriers");
+  const tDashboard = useI18n("merchantDashboard");
   const rating =
     typeof courier.rating_aggregate === "number" ? courier.rating_aggregate : 0;
 
@@ -283,37 +288,34 @@ function CourierCard({
             variant={isPartner ? "default" : "outline"}
             className="shrink-0 text-[10px] uppercase tracking-[0.3em]"
           >
-            {isPartner ? "Partner" : "Available"}
+            {isPartner ? t("card.partnerBadge") : t("card.availableBadge")}
           </Badge>
         </div>
         <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-          <Star className="h-4 w-4 text-amber-400" />
-          <span>{rating.toFixed(1)} rating</span>
-          <span className="text-muted-foreground/60">•</span>
-          <span>{courier.email || "Private"}</span>
+          <span>{courier.email || t("card.privateEmail")}</span>
         </div>
       </CardHeader>
 
       <CardContent className="grid flex-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <CardDescription className="text-[11px] uppercase tracking-[0.4em] text-muted-foreground/80">
-            Fees & limits
+            {t("card.feesLimits")}
           </CardDescription>
           <p className="text-sm text-foreground">
-            Base price: ${Number(courier.base_price).toFixed(2)}
+            {t("card.basePrice")}: {tDashboard("latestDeparture.currency")}{Number(courier.base_price).toFixed(2)}
           </p>
           <p className="text-sm text-foreground">
-            Distance: ${Number(courier.distance_rate).toFixed(2)}/km
+            {t("card.distance")}: {tDashboard("latestDeparture.currency")}{Number(courier.distance_rate).toFixed(2)}{t("card.perKm")}
           </p>
           <p className="text-sm text-foreground">
-            Weight: ${Number(courier.weight_rate).toFixed(2)}/kg
+            {t("card.weight")}: {tDashboard("latestDeparture.currency")}{Number(courier.weight_rate).toFixed(2)}{t("card.perKg")}
           </p>
         </div>
         <div className="space-y-2">
           <CardDescription className="text-[11px] uppercase tracking-[0.4em] text-muted-foreground/80">
-            Capacity
+            {t("card.capacity")}
           </CardDescription>
-          <p className="text-sm text-foreground">{courier.max_weight} kg max load</p>
+          <p className="text-sm text-foreground">{t("card.maxLoad", { weight: String(courier.max_weight) })}</p>
           {courier.website_url && (
             <a
               href={courier.website_url}
@@ -321,7 +323,7 @@ function CourierCard({
               rel="noreferrer"
               className="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:text-primary-foreground"
             >
-              Visit site
+              {t("card.visitSite")}
               <ExternalLink className="h-4 w-4" />
             </a>
           )}
@@ -335,7 +337,7 @@ function CourierCard({
           size="sm"
           className="ml-auto rounded-xl border-border/50 font-semibold"
         >
-          <Link href={`/merchant/couriers/${courier.id}`}>View details</Link>
+          <Link href={`/merchant/couriers/${courier.id}`}>{t("card.viewDetails")}</Link>
         </Button>
       </CardFooter>
     </Card>

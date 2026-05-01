@@ -35,6 +35,7 @@ export interface ShipmentResponse {
     phone_number?: string;
     email?: string;
   };
+  confirmation_code?: string;
   [key: string]: unknown;
 }
 
@@ -104,6 +105,7 @@ export async function getShipments(
 
 export interface ShipmentUpdatePayload {
   courier_company_id?: number;
+  merchant_user_id?: string;
   start_address?: string;
   end_address?: string;
   description?: string;
@@ -155,15 +157,62 @@ export async function updateShipment(
   return data as ShipmentResponse;
 }
 
-export async function deleteShipment(token: string, code: string): Promise<void> {
+export async function cancelShipment(token: string, code: string, remark?: string): Promise<void> {
   const encodedCode = encodeURIComponent(code);
-  const res = await fetch(`/api/shipments/${encodedCode}`, {
-    method: "DELETE",
-    headers: { Authorization: `Bearer ${token}` },
+  const res = await fetch(`/api/shipments/${encodedCode}/cancel`, {
+    method: "POST",
+    headers: { 
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ remark }),
   });
 
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    throw new Error(data?.message || data?.error || "Failed to delete shipment");
+    throw new Error(data?.message || data?.error || "Failed to cancel shipment");
   }
+}
+
+export async function rateShipment(
+  token: string,
+  code: string,
+  ratingOutOf10: number
+): Promise<unknown> {
+  const encodedCode = encodeURIComponent(code);
+  const res = await fetch(`/api/shipments/${encodedCode}/rate`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ rating: ratingOutOf10 }),
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    throw new Error(data?.message || data?.error || "Failed to submit shipment rating");
+  }
+
+  return data;
+}
+
+export async function generateConfirmationCode(token: string, code: string): Promise<unknown> {
+  const encodedCode = encodeURIComponent(code);
+  const res = await fetch(`/api/shipments/${encodedCode}/generate-confirmation-code`, {
+    method: "POST",
+    headers: { 
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    throw new Error(data?.message || data?.error || "Failed to generate confirmation code");
+  }
+
+  return data;
 }

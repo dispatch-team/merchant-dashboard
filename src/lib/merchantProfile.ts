@@ -176,8 +176,9 @@ export function sanitizeLogoIdForProxy(raw: string): string {
   const prefixes = [
     "api/v1/merchants/logos/",
     "v1/merchants/logos/",
-    "merchants/logos/",
-  ];
+    "merchants/logos/",    "logos/",
+    "api/v1/",
+    "v1/",  ];
   const lower = s.toLowerCase();
   for (const p of prefixes) {
     if (lower.startsWith(p)) {

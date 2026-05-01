@@ -8,6 +8,7 @@ import { DataTable } from "@/components/DataTable";
 import { useAuth } from "@/context/AuthContext";
 import { getAPIKeys, generateAPIKey, verifyAPIKey, deleteAPIKey, APIKeyMetadata, GeneratedAPIKey } from "@/lib/api-keys";
 import { useToast } from "@/components/ui/use-toast";
+import { useI18n } from "@/intl";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +23,12 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export default function APIKeysPage() {
+  const t = useI18n("apiKeys");
+  const tNewShipment = useI18n("newShipment");
+  const tShipments = useI18n("shipments");
+  const tAuth = useI18n("auth");
+  const tDetails = useI18n("shipmentDetails");
+  const tWebhooks = useI18n("webhooks");
   const { getValidAccessToken } = useAuth();
   const { toast } = useToast();
 
@@ -50,7 +57,7 @@ export default function APIKeysPage() {
     try {
       const token = await getValidAccessToken();
       if (!token) {
-        setError("User not authenticated");
+        setError(tAuth("sessionExpired"));
         return;
       }
       const data = await getAPIKeys(token);
@@ -58,7 +65,7 @@ export default function APIKeysPage() {
       setError(null);
     } catch (err: any) {
       console.error("Failed to load API keys:", err);
-      setError(err.message || "Failed to load API keys");
+      setError(err.message || tDetails("errorUpdate"));
     } finally {
       setIsLoading(false);
     }
@@ -81,15 +88,14 @@ export default function APIKeysPage() {
       fetchKeys(); // Refresh the list
       
       toast({
-        title: "API Key Generated",
-        description: "Your new API key has been created successfully.",
+        title: t("successCreate"),
       });
     } catch (err: any) {
       console.error("Failed to generate API key:", err);
       toast({
         variant: "destructive",
-        title: "Generation Failed",
-        description: err.message || "Could not generate a new API key.",
+        title: tDetails("errorUpdate"),
+        description: err.message,
       });
     } finally {
       setIsGenerating(false);
@@ -109,8 +115,8 @@ export default function APIKeysPage() {
       console.error("Failed to verify API key:", err);
       toast({
         variant: "destructive",
-        title: "Verification Error",
-        description: err.message || "Could not verify the API key.",
+        title: tDetails("errorUpdate"),
+        description: err.message,
       });
     } finally {
       setIsVerifying(false);
@@ -125,8 +131,7 @@ export default function APIKeysPage() {
       if (!token) return;
       await deleteAPIKey(token, keyToDelete.ID);
       toast({
-        title: "API Key Deleted",
-        description: `Key #${keyToDelete.ID} was removed successfully.`,
+        title: t("successDelete"),
       });
       setIsDeleteConfirmOpen(false);
       fetchKeys(); // Refresh the list
@@ -134,8 +139,8 @@ export default function APIKeysPage() {
       console.error("Failed to delete API key:", err);
       toast({
         variant: "destructive",
-        title: "Deletion Failed",
-        description: err.message || "Could not delete the API key.",
+        title: tDetails("errorUpdate"),
+        description: err.message,
       });
     } finally {
       setIsDeleting(false);
@@ -148,8 +153,7 @@ export default function APIKeysPage() {
       setHasCopied(true);
       setTimeout(() => setHasCopied(false), 2000);
       toast({
-        title: "Copied",
-        description: "API key copied to clipboard.",
+        title: t("copy"),
       });
     }
   };
@@ -157,7 +161,7 @@ export default function APIKeysPage() {
   const columns: any[] = [
     {
       key: "ID",
-      header: "Key ID",
+      header: t("table.name"),
       render: (item: APIKeyMetadata) => (
         <span className="font-mono text-[10px] text-muted-foreground uppercase opacity-70">
           #{item.ID}
@@ -166,7 +170,7 @@ export default function APIKeysPage() {
     },
     {
       key: "status",
-      header: "Status",
+      header: t("table.status"),
       render: (item: APIKeyMetadata) => {
         const isRevoked = !!item.DeletedAt;
         return (
@@ -174,26 +178,26 @@ export default function APIKeysPage() {
             variant={isRevoked ? "destructive" : "default"} 
             className="capitalize h-5 px-2 text-[10px]"
           >
-            {isRevoked ? "revoked" : "active"}
+            {isRevoked ? t("revoked") : t("active")}
           </Badge>
         );
       },
     },
     {
       key: "last_used_at",
-      header: "Last Used",
+      header: t("table.created"),
       render: (item: APIKeyMetadata) => {
         const neverUsed = item.last_used_at.startsWith("0001-01-01");
         return (
           <span className="text-[11px] text-muted-foreground">
-            {neverUsed ? "Never" : new Date(item.last_used_at).toLocaleString()}
+            {neverUsed ? "—" : new Date(item.last_used_at).toLocaleString()}
           </span>
         );
       },
     },
     {
       key: "CreatedAt",
-      header: "Created",
+      header: t("table.created"),
       render: (item: APIKeyMetadata) => (
         <span className="text-[11px] text-muted-foreground">
           {new Date(item.CreatedAt).toLocaleString()}
@@ -202,7 +206,7 @@ export default function APIKeysPage() {
     },
     {
       key: "actions",
-      header: "Actions",
+      header: t("table.actions"),
       className: "text-right",
       render: (item: APIKeyMetadata) => (
         <div className="flex items-center justify-end gap-2">
@@ -218,7 +222,7 @@ export default function APIKeysPage() {
             }}
           >
             <ShieldCheck className="h-3 w-3" />
-            Verify
+            {t("verifyTitle")}
           </Button>
           {!item.DeletedAt && (
             <Button
@@ -251,11 +255,11 @@ export default function APIKeysPage() {
           <div className="space-y-2">
             <div className="flex items-center gap-2 mb-1">
               <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary/80">Security & Integration</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary/80">{useI18n("newShipment")("sections.courier")}</p>
             </div>
-            <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-br from-foreground to-foreground/60 bg-clip-text text-transparent">API Keys</h1>
+            <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-br from-foreground to-foreground/60 bg-clip-text text-transparent">{t("title")}</h1>
             <p className="text-muted-foreground max-w-md text-sm leading-relaxed">
-              Generate and manage secure keys to authenticate your external applications with the Dispatch platform.
+              {t("subtitle")}
             </p>
           </div>
           
@@ -268,7 +272,7 @@ export default function APIKeysPage() {
                className="rounded-2xl gap-2 border-border/40 hover:bg-muted/50"
              >
                <RefreshCcw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-               Refresh
+               {tShipments("refresh")}
              </Button>
              <Button 
                size="lg" 
@@ -277,7 +281,7 @@ export default function APIKeysPage() {
                className="rounded-2xl gap-2 shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
              >
                <Plus className="h-4 w-4" />
-               Generate New Key
+               {t("newKey")}
              </Button>
           </div>
         </div>
@@ -288,10 +292,10 @@ export default function APIKeysPage() {
         <div className="flex items-center justify-between px-2">
             <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">
                 <Key className="h-3 w-3" />
-                <span>Authorized Credentials</span>
+                <span>{t("authorizedCredentials")}</span>
             </div>
             <span className="text-[10px] text-muted-foreground/40 font-mono">
-                {keys.length} Keys total
+                {t("totalKeys", { count: String(keys.length) })}
             </span>
         </div>
 
@@ -308,7 +312,7 @@ export default function APIKeysPage() {
             columns={columns}
             data={keys as any}
             keyExtractor={(item: any) => item.ID}
-            emptyMessage={isLoading ? "Loading keys..." : "No API keys found. Generate one to get started."}
+            emptyMessage={isLoading ? tShipments("loading") : tShipments("empty")}
           />
         </div>
       </section>
@@ -322,9 +326,9 @@ export default function APIKeysPage() {
             <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                 <ShieldCheck className="h-6 w-6" />
             </div>
-            <DialogTitle className="text-center text-2xl font-bold">API Key Generated</DialogTitle>
+            <DialogTitle className="text-center text-2xl font-bold">{t("successCreate")}</DialogTitle>
             <DialogDescription className="text-center pt-2">
-              Please copy your new API key now. For security reasons, you won't be able to see it again.
+              {t("criticalDesc")}
             </DialogDescription>
           </DialogHeader>
 
@@ -355,9 +359,9 @@ export default function APIKeysPage() {
 
             <Alert className="rounded-2xl border-amber-500/20 bg-amber-500/5 text-amber-500/90 py-4">
               <AlertTriangle className="h-4 w-4 text-amber-500" />
-              <AlertTitle className="text-xs font-bold uppercase tracking-wider mb-1">Critical Warning</AlertTitle>
+              <AlertTitle className="text-xs font-bold uppercase tracking-wider mb-1">{t("criticalWarning")}</AlertTitle>
               <AlertDescription className="text-[11px] leading-relaxed opacity-80">
-                This key is only displayed once. If you lose it, you will need to generate a new one and update your integrations. Store it securely in a password manager or vault.
+                {t("criticalDesc")}
               </AlertDescription>
             </Alert>
           </div>
@@ -369,7 +373,7 @@ export default function APIKeysPage() {
               onClick={() => setIsDialogOpen(false)}
               className="w-full rounded-xl h-11 font-semibold shadow-lg shadow-primary/20"
             >
-              I've saved the key
+              {t("savedKey")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -383,15 +387,15 @@ export default function APIKeysPage() {
             <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                 <Key className="h-6 w-6" />
             </div>
-            <DialogTitle className="text-center text-2xl font-bold">Verify API Key</DialogTitle>
+            <DialogTitle className="text-center text-2xl font-bold">{t("verifyTitle")}</DialogTitle>
             <DialogDescription className="text-center pt-2">
-              Paste an API key string below to check if it is still valid and active.
+              {t("verifyDesc")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="mt-4 space-y-6 relative z-10">
             <div className="space-y-2">
-              <label htmlFor="verify-key" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-1">API Key String</label>
+              <label htmlFor="verify-key" className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground ml-1">{t("verifyLabel")}</label>
               <Input
                 id="verify-key"
                 placeholder="dsp_..."
@@ -423,12 +427,12 @@ export default function APIKeysPage() {
                 </div>
                 <div>
                   <p className="text-sm font-bold">
-                    {verificationResult.is_valid ? "Key is Valid" : "Invalid Key"}
+                    {verificationResult.is_valid ? t("isValid") : t("isInvalid")}
                   </p>
                   <p className="text-[11px] opacity-80">
                     {verificationResult.is_valid 
-                      ? "This API key is active and can be used for integrations." 
-                      : "This key is either incorrect or has been revoked."}
+                      ? t("validDesc") 
+                      : t("invalidDesc")}
                   </p>
                 </div>
               </motion.div>
@@ -440,7 +444,7 @@ export default function APIKeysPage() {
               className="w-full rounded-xl h-12 font-semibold shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90"
             >
               {isVerifying ? <RefreshCcw className="h-4 w-4 animate-spin mr-2" /> : null}
-              {isVerifying ? "Verifying..." : "Check Validity"}
+              {isVerifying ? tNewShipment("creating") : t("verifyTitle")}
             </Button>
           </div>
         </DialogContent>
@@ -455,9 +459,9 @@ export default function APIKeysPage() {
             <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center text-destructive">
                 <AlertTriangle className="h-6 w-6" />
             </div>
-            <DialogTitle className="text-center text-2xl font-bold text-destructive">Delete API Key</DialogTitle>
+            <DialogTitle className="text-center text-2xl font-bold text-destructive">{t("delete")}</DialogTitle>
             <DialogDescription className="text-center pt-2">
-              Are you sure you want to delete Key <span className="font-mono font-bold">#{keyToDelete?.ID}</span>? This action is permanent and cannot be undone.
+              {t("confirmDelete")}
             </DialogDescription>
           </DialogHeader>
 
@@ -469,14 +473,14 @@ export default function APIKeysPage() {
               className="w-full rounded-xl h-12 font-semibold shadow-lg shadow-destructive/20"
             >
               {isDeleting ? <RefreshCcw className="h-4 w-4 animate-spin mr-2" /> : null}
-              {isDeleting ? "Deleting..." : "Permanently Delete"}
+              {isDeleting ? t("deleting") : t("confirm")}
             </Button>
             <Button
               variant="ghost"
               onClick={() => setIsDeleteConfirmOpen(false)}
               className="w-full rounded-xl h-12 font-semibold hover:bg-muted/50"
             >
-              Cancel
+              {tNewShipment("cancel")}
             </Button>
           </div>
         </DialogContent>

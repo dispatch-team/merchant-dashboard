@@ -14,6 +14,11 @@ export const metadata: Metadata = {
   title: "Dispatch - Unified Logistics Platform",
   description:
     "Dispatch connects merchants and courier providers in Addis Ababa with a unified logistics platform.",
+  icons: {
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
+  },
 };
 
 export default function RootLayout({

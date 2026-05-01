@@ -28,6 +28,7 @@ import { getPartnerCouriers, CourierProfile } from "@/lib/couriers";
 import { createShipment } from "@/lib/shipments";
 import { toast } from "sonner";
 import dispatchLogo from "@/assets/dispatch-logo.png";
+import { useI18n } from "@/intl";
 
 interface FormFields {
   courier_company_id: string;
@@ -76,43 +77,44 @@ function isValidUrl(url: string) {
 }
 
 function isValidPhone(phone: string) {
-  return /^[+\d\s\-().]{7,20}$/.test(phone.trim());
+  return /^\+251\d{9}$/.test(phone.trim());
 }
 
 function validate(
   fields: FormFields,
-  selectedCourier: CourierProfile | null
+  selectedCourier: CourierProfile | null,
+  t: (key: string, params?: any) => string
 ): FormErrors {
   const errors: FormErrors = {};
 
   if (!fields.courier_company_id || parseInt(fields.courier_company_id, 10) <= 0)
-    errors.courier_company_id = "Please select a valid partner courier.";
+    errors.courier_company_id = t("validation.selectCourier");
 
 
   if (!fields.start_address.trim())
-    errors.start_address = "Pickup address is required.";
+    errors.start_address = t("validation.pickupRequired");
 
   if (!fields.end_address.trim())
-    errors.end_address = "Destination address is required.";
+    errors.end_address = t("validation.destRequired");
 
   if (!fields.recipient_name.trim())
-    errors.recipient_name = "Recipient name is required.";
+    errors.recipient_name = t("validation.nameRequired");
 
   if (!fields.recipient_phone.trim()) {
-    errors.recipient_phone = "Recipient phone number is required.";
+    errors.recipient_phone = t("validation.phoneRequired");
   } else if (!isValidPhone(fields.recipient_phone)) {
-    errors.recipient_phone = "Enter a valid phone number.";
+    errors.recipient_phone = t("validation.phoneInvalid");
   }
 
   if (!fields.description.trim())
-    errors.description = "Package description is required.";
+    errors.description = t("validation.descRequired");
 
   if (fields.weight_kg) {
     const w = parseFloat(fields.weight_kg);
     if (isNaN(w) || w <= 0) {
-      errors.weight_kg = "Weight must be a positive number.";
+      errors.weight_kg = t("validation.weightPositive");
     } else if (selectedCourier && w > selectedCourier.max_weight) {
-      errors.weight_kg = `Weight exceeds ${selectedCourier.company_name}'s maximum of ${selectedCourier.max_weight} kg.`;
+      errors.weight_kg = t("validation.weightExceeds", { name: selectedCourier.company_name, weight: selectedCourier.max_weight });
     }
   }
 
@@ -122,6 +124,11 @@ function validate(
 }
 
 export default function NewShipmentPage() {
+  const t = useI18n("newShipment");
+  const tAuth = useI18n("auth");
+  const tDetails = useI18n("shipmentDetails");
+  const tNav = useI18n("nav_merchant");
+  const tDashboard = useI18n("merchantDashboard");
   const { user, getValidAccessToken } = useAuth();
   const router = useRouter();
 
@@ -149,7 +156,7 @@ export default function NewShipmentPage() {
         setCouriers(data || []);
       } catch (err: unknown) {
         const message =
-          err instanceof Error ? err.message : "Failed to load partner couriers.";
+          err instanceof Error ? err.message : t("fields.loadingCouriers");
         setCouriersError(message);
       } finally {
         setCouriersLoading(false);
@@ -164,7 +171,7 @@ export default function NewShipmentPage() {
   // Re-validate on field change if field was touched
   const revalidate = useCallback(
     (updated: FormFields) => {
-      const errs = validate(updated, selectedCourier);
+      const errs = validate(updated, selectedCourier, t);
       setErrors((prev) => {
         const next: FormErrors = { ...prev };
         (Object.keys(errs) as (keyof FormErrors)[]).forEach((k) => {
@@ -176,7 +183,7 @@ export default function NewShipmentPage() {
         return next;
       });
     },
-    [selectedCourier, touched]
+    [selectedCourier, touched, t]
   );
 
   // Also re-run weight validation when courier changes
@@ -198,7 +205,7 @@ export default function NewShipmentPage() {
     setFields(updated);
     if (touched[name as keyof FormFields]) {
       // Recompute errors for the changed field immediately
-      const errs = validate(updated, selectedCourier);
+      const errs = validate(updated, selectedCourier, t);
       setErrors((prev) => ({
         ...prev,
         [name]: errs[name as keyof FormErrors],
@@ -209,7 +216,7 @@ export default function NewShipmentPage() {
   function handleBlur(e: React.FocusEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     const { name } = e.target;
     setTouched((prev) => ({ ...prev, [name]: true }));
-    const errs = validate(fields, selectedCourier);
+    const errs = validate(fields, selectedCourier, t);
     setErrors((prev) => ({
       ...prev,
       [name]: errs[name as keyof FormErrors],
@@ -226,7 +233,7 @@ export default function NewShipmentPage() {
     });
     setTouched(allTouched);
 
-    const errs = validate(fields, selectedCourier);
+    const errs = validate(fields, selectedCourier, t);
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
@@ -234,15 +241,15 @@ export default function NewShipmentPage() {
     try {
       const token = await getValidAccessToken();
       if (!token) {
-        toast.error("Session expired. Please log in again.");
+        toast.error(tAuth("sessionExpired"));
         return;
       }
 
       // Build description: include recipient info
       const fullDescription = [
         fields.description.trim(),
-        `Recipient: ${fields.recipient_name.trim()}`,
-        `Phone: ${fields.recipient_phone.trim()}`,
+        `${t("fields.recipient")}: ${fields.recipient_name.trim()}`,
+        `${t("fields.phone")}: ${fields.recipient_phone.trim()}`,
       ]
         .filter(Boolean)
         .join(" | ");
@@ -277,9 +284,9 @@ export default function NewShipmentPage() {
         id: result.id ?? result.shipment_id ?? "N/A",
         status: result.status ?? "Pending",
       });
-      toast.success("Shipment created successfully!");
+      toast.success(t("successTitle"));
     } catch (err: any) {
-      toast.error(err.message || "Something went wrong. Please try again.");
+      toast.error(err.message || tDetails("errorUpdate"));
     } finally {
       setIsSubmitting(false);
     }
@@ -309,7 +316,7 @@ export default function NewShipmentPage() {
               <div className="flex items-center gap-3">
                 <img src={dispatchLogo.src} alt="Dispatch" className="h-7 w-auto" />
                 <span className="text-xs text-muted-foreground/50 font-medium uppercase tracking-widest hidden sm:block">
-                  Merchant / New Shipment
+                  {t("breadcrumb")}
                 </span>
               </div>
             </div>
@@ -323,10 +330,10 @@ export default function NewShipmentPage() {
               <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
                 <Package className="h-4 w-4 text-primary" />
               </div>
-              <h1 className="text-2xl font-bold tracking-tight">New Shipment</h1>
+              <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
             </div>
             <p className="text-sm text-muted-foreground ml-12">
-              Fill in the details below to book a new delivery.
+              {t("subtitle")}
             </p>
           </div>
 
@@ -338,16 +345,12 @@ export default function NewShipmentPage() {
                   <CheckCircle2 className="h-5 w-5 text-emerald-400" />
                 </div>
                 <div>
-                  <p className="font-semibold text-foreground">Shipment Created!</p>
+                  <p className="font-semibold text-foreground">{t("successTitle")}</p>
                   <p className="text-sm text-muted-foreground mt-0.5">
-                    Your shipment has been booked with status{" "}
-                    <span className="font-medium text-foreground capitalize">
-                      {createdShipment.status}
-                    </span>
-                    .
+                    {t("successDesc", { status: createdShipment.status })}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1 font-mono">
-                    Shipment ID:{" "}
+                    {t("shipmentId")}:{" "}
                     <span className="text-foreground font-semibold">
                       {createdShipment.id}
                     </span>
@@ -366,13 +369,13 @@ export default function NewShipmentPage() {
                     setTouched({});
                   }}
                 >
-                  New Shipment
+                  {t("title")}
                 </Button>
                 <Button
                   size="sm"
                   onClick={() => router.push("/merchant")}
                 >
-                  Dashboard
+                  {t("dashboard")}
                 </Button>
               </div>
             </div>
@@ -384,15 +387,15 @@ export default function NewShipmentPage() {
               <div className="rounded-2xl border border-border/50 bg-card/60 backdrop-blur-sm divide-y divide-border/30 overflow-hidden">
 
                 {/* ── Section: Courier ── */}
-                <FormSection title="Courier" icon={<Truck className="h-4 w-4 text-primary" />}>
+                <FormSection title={t("sections.courier")} icon={<Truck className="h-4 w-4 text-primary" />}>
                   <div>
                     <label className="block text-xs font-medium text-muted-foreground mb-1.5">
-                      Partner courier <span className="text-destructive">*</span>
+                      {t("fields.partnerCourier")} <span className="text-destructive">*</span>
                     </label>
                     {couriersLoading ? (
                       <div className="flex items-center gap-2 h-10 px-3 rounded-xl border border-border/40 bg-background/40">
                         <Loader2 className="h-4 w-4 animate-spin text-muted-foreground/50" />
-                        <span className="text-sm text-muted-foreground/60">Loading partner couriers…</span>
+                        <span className="text-sm text-muted-foreground/60">{t("fields.loadingCouriers")}</span>
                       </div>
                     ) : couriersError ? (
                       <div className="flex items-center gap-2 h-10 px-3 rounded-xl border border-destructive/30 bg-destructive/5">
@@ -416,12 +419,12 @@ export default function NewShipmentPage() {
                           >
                             <option value="">
                               {couriers.length === 0
-                                ? "No partner couriers yet"
-                                : "-- Choose a partner courier --"}
+                                ? t("fields.noCouriers")
+                                : t("fields.chooseCourier")}
                             </option>
                             {couriers.map((c) => (
                               <option key={c.id} value={String(c.id)}>
-                                {c.company_name} — max {c.max_weight} kg
+                                {c.company_name} — {t("fields.maxWeightHint", { weight: c.max_weight })}
                               </option>
                             ))}
                           </select>
@@ -429,14 +432,14 @@ export default function NewShipmentPage() {
                         </div>
                         {couriers.length === 0 ? (
                           <p className="text-xs text-muted-foreground leading-relaxed">
-                            Add carriers as partners on the{" "}
+                            {t("noCouriersDesc_part1")}
                             <Link
                               href="/merchant/couriers"
                               className="font-medium text-primary underline-offset-2 hover:underline"
                             >
-                              Couriers
-                            </Link>{" "}
-                            page to assign shipments to them.
+                              {tNav("couriers")}
+                            </Link>
+                            {t("noCouriersDesc_part2")}
                           </p>
                         ) : null}
                       </div>
@@ -445,17 +448,17 @@ export default function NewShipmentPage() {
                     {selectedCourier && (
                       <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
-                        Base price ${selectedCourier.base_price.toFixed(2)} · Max weight {selectedCourier.max_weight} kg
+                        {t("fields.basePrice")} {tDashboard("latestDeparture.currency")}{selectedCourier.base_price.toFixed(2)} · {t("fields.maxWeight")} {selectedCourier.max_weight} kg
                       </p>
                     )}
                   </div>
                 </FormSection>
 
                 {/* ── Section: Addresses ── */}
-                <FormSection title="Addresses" icon={<MapPin className="h-4 w-4 text-primary" />}>
+                <FormSection title={t("sections.addresses")} icon={<MapPin className="h-4 w-4 text-primary" />}>
                   <div className="space-y-4">
                     <FormField
-                      label="Pickup Address"
+                      label={t("fields.pickupAddress")}
                       required
                       name="start_address"
                       placeholder="e.g. Bole Road, Addis Ababa"
@@ -466,7 +469,7 @@ export default function NewShipmentPage() {
                       onBlur={handleBlur}
                     />
                     <FormField
-                      label="Destination Address"
+                      label={t("fields.destinationAddress")}
                       required
                       name="end_address"
                       placeholder="e.g. Piassa, Addis Ababa"
@@ -480,10 +483,10 @@ export default function NewShipmentPage() {
                 </FormSection>
 
                 {/* ── Section: Recipient ── */}
-                <FormSection title="Recipient" icon={<User className="h-4 w-4 text-primary" />}>
+                <FormSection title={t("sections.recipient")} icon={<User className="h-4 w-4 text-primary" />}>
                   <div className="grid sm:grid-cols-2 gap-4">
                     <FormField
-                      label="Recipient Name"
+                      label={t("fields.recipientName")}
                       required
                       name="recipient_name"
                       placeholder="Full name"
@@ -494,10 +497,10 @@ export default function NewShipmentPage() {
                       onBlur={handleBlur}
                     />
                     <FormField
-                      label="Recipient Phone"
+                      label={t("fields.recipientPhone")}
                       required
                       name="recipient_phone"
-                      placeholder="+251 911 000 000"
+                      placeholder="+251911000000"
                       icon={<Phone className="h-3.5 w-3.5" />}
                       value={fields.recipient_phone}
                       error={errors.recipient_phone}
@@ -509,10 +512,10 @@ export default function NewShipmentPage() {
                 </FormSection>
 
                 {/* ── Section: Package ── */}
-                <FormSection title="Package Details" icon={<Package className="h-4 w-4 text-primary" />}>
+                <FormSection title={t("sections.package")} icon={<Package className="h-4 w-4 text-primary" />}>
                   <div className="space-y-4">
                     <FormField
-                      label="Package Description"
+                      label={t("fields.packageDescription")}
                       required
                       name="description"
                       placeholder="Describe what's being shipped"
@@ -525,7 +528,7 @@ export default function NewShipmentPage() {
                     />
                     <div className="grid sm:grid-cols-2 gap-4">
                       <FormField
-                        label="Weight (kg)"
+                        label={t("fields.weight")}
                         name="weight_kg"
                         placeholder="e.g. 3.5"
                         icon={<Weight className="h-3.5 w-3.5" />}
@@ -538,30 +541,30 @@ export default function NewShipmentPage() {
                         min="0"
                         hint={
                           selectedCourier
-                            ? `Max ${selectedCourier.max_weight} kg for this courier`
-                            : "Optional"
+                            ? t("fields.maxWeightForCourier", { weight: String(selectedCourier.max_weight) })
+                            : t("fields.optional")
                         }
                       />
                       <FormField
-                        label="Dimensions"
+                        label={t("fields.dimensions")}
                         name="dimensions"
                         placeholder="e.g. 1m X 20cm X 20cm"
                         icon={<Ruler className="h-3.5 w-3.5" />}
                         value={fields.dimensions}
                         onChange={handleChange}
                         onBlur={handleBlur}
-                        hint="Optional"
+                        hint={t("fields.optional")}
                       />
                     </div>
                     <FormField
-                      label="Items"
+                      label={t("fields.items")}
                       name="items"
                       placeholder="Item 1, Item 2, Item 3"
                       icon={<List className="h-3.5 w-3.5" />}
                       value={fields.items}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      hint="Comma-separated list of items. Optional."
+                      hint={t("fields.commaSeparated")}
                     />
                   </div>
                 </FormSection>
@@ -578,7 +581,7 @@ export default function NewShipmentPage() {
                   className="text-muted-foreground"
                   disabled={isSubmitting}
                 >
-                  Cancel
+                  {t("cancel")}
                 </Button>
                 <Button
                   type="submit"
@@ -588,12 +591,12 @@ export default function NewShipmentPage() {
                   {isSubmitting ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Creating…
+                      {t("creating")}
                     </>
                   ) : (
                     <>
                       <Package className="h-4 w-4" />
-                      Create Shipment
+                      {t("create")}
                     </>
                   )}
                 </Button>
@@ -619,6 +622,7 @@ function FormSection({
   children: React.ReactNode;
   collapsible?: boolean;
 }) {
+  const t = useI18n("newShipment");
   const [open, setOpen] = useState(!collapsible);
 
   return (
@@ -638,7 +642,7 @@ function FormSection({
           />
         )}
         {collapsible && !open && (
-          <span className="text-xs text-muted-foreground/50 ml-auto mr-6">Optional</span>
+          <span className="text-xs text-muted-foreground/50 ml-auto mr-6">{t("fields.optional")}</span>
         )}
       </button>
       {open && <div>{children}</div>}

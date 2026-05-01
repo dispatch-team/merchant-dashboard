@@ -62,9 +62,11 @@ const LocaleContext = createContext<LocaleContextValue>({
 
 export function IntlProvider({ children }: { children: React.ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE);
+  const [isMounted, setIsMounted] = useState(false);
 
   // Hydrate from localStorage on mount
   useEffect(() => {
+    setIsMounted(true);
     const stored = localStorage.getItem(LOCALE_STORAGE_KEY) as Locale | null;
     if (stored && stored in MESSAGE_MAP) {
       setLocaleState(stored);
@@ -76,11 +78,13 @@ export function IntlProvider({ children }: { children: React.ReactNode }) {
     setLocaleState(next);
   }, []);
 
-  const messages = MESSAGE_MAP[locale] as unknown as Record<string, unknown>;
+  // During hydration, we must use the DEFAULT_LOCALE (which matches the server-rendered HTML)
+  const currentLocale = isMounted ? locale : DEFAULT_LOCALE;
+  const messages = MESSAGE_MAP[currentLocale] as unknown as Record<string, unknown>;
 
   return (
     <LocaleContext.Provider value={{ locale, setLocale }}>
-      <NextIntlClientProvider locale={locale} messages={messages}>
+      <NextIntlClientProvider locale={currentLocale} messages={messages}>
         {children}
       </NextIntlClientProvider>
     </LocaleContext.Provider>
@@ -112,17 +116,31 @@ export function useI18n<NS extends Namespace>(namespace: NS) {
   const ns = messages[namespace] as NSMessages<NS>;
 
   const t = useCallback(
-    (key: string, replacements?: Record<string, string>): string => {
+    (key: string, replacements?: Record<string, string | number>): any => {
       const parts = key.split(".");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let value: any = ns;
       for (const part of parts) {
         value = value?.[part];
       }
+
+      if (Array.isArray(value)) {
+        return value.map(v => {
+          if (typeof v !== "string") return v;
+          let result = v;
+          if (replacements) {
+            for (const [rk, rv] of Object.entries(replacements)) {
+              result = result.replace(`{${rk}}`, String(rv));
+            }
+          }
+          return result;
+        });
+      }
+
       let result = typeof value === "string" ? value : key;
       if (replacements) {
         for (const [k, v] of Object.entries(replacements)) {
-          result = result.replace(`{${k}}`, v);
+          result = result.replace(`{${k}}`, String(v));
         }
       }
       return result;

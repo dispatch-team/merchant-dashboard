@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { DataTable } from "@/components/DataTable";
 import { useAuth } from "@/context/AuthContext";
 import { getShipments, ShipmentListResponse, ShipmentResponse } from "@/lib/shipments";
+import { useI18n } from "@/intl";
 
 const pageSize = 10;
 
@@ -22,6 +23,7 @@ function statusVariant(status?: string) {
 }
 
 export default function ShipmentsListPage() {
+  const t = useI18n("shipments");
   const { user, getValidAccessToken } = useAuth();
   const router = useRouter();
 
@@ -30,6 +32,11 @@ export default function ShipmentsListPage() {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const fetchShipments = useCallback(
     async (currentPage: number) => {
@@ -77,7 +84,7 @@ export default function ShipmentsListPage() {
   const columns = [
     {
       key: "code",
-      header: "Code",
+      header: t("columns.code"),
       render: (item: ShipmentResponse) => (
         <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em]">
           {item.code || item.id}
@@ -86,17 +93,17 @@ export default function ShipmentsListPage() {
     },
     {
       key: "start_address",
-      header: "Pickup",
+      header: t("columns.pickup"),
       className: "truncate max-w-[140px]",
     },
     {
       key: "end_address",
-      header: "Destination",
+      header: t("columns.destination"),
       className: "truncate max-w-[140px]",
     },
     {
       key: "status",
-      header: "Status",
+      header: t("columns.status"),
       render: (item: ShipmentResponse) => (
         <Badge variant={statusVariant(item.status)} className="capitalize">
           {item.status || "Pending"}
@@ -105,16 +112,16 @@ export default function ShipmentsListPage() {
     },
     {
       key: "created_at",
-      header: "Created",
+      header: t("columns.created"),
       render: (item: ShipmentResponse) => (
         <span className="text-[11px] text-muted-foreground">
-          {item.created_at ? new Date(item.created_at).toLocaleString() : "—"}
+          {isClient && item.created_at ? new Date(item.created_at).toLocaleString() : "—"}
         </span>
       ),
     },
     {
       key: "actions",
-      header: "Actions",
+      header: t("columns.actions"),
       className: "text-right",
       render: (item: ShipmentResponse) => (
         <UiButton
@@ -123,7 +130,7 @@ export default function ShipmentsListPage() {
           className="text-xs font-semibold"
           onClick={() => router.push(`/merchant/shipments/${encodeURIComponent(item.code ?? item.id)}`)}
         >
-          View Details
+          {t("viewDetails")}
         </UiButton>
       ),
     },
@@ -148,11 +155,11 @@ export default function ShipmentsListPage() {
     ).length;
 
     return [
-      { label: "Total shipments", value: data.total ?? 0 },
-      { label: "Active dispatches", value: active },
-      { label: "Pending review", value: pending },
+      { label: t("stats.total"), value: data.total ?? 0 },
+      { label: t("stats.active"), value: active },
+      { label: t("stats.pending"), value: pending },
     ];
-  }, [data]);
+  }, [data, t]);
 
   return (
     <div className="space-y-8">
@@ -160,11 +167,11 @@ export default function ShipmentsListPage() {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.4em] text-muted-foreground/80">
-              Shipments
+              {t("overview")}
             </p>
-            <h1 className="text-3xl font-semibold">Manage deliveries</h1>
+            <h1 className="text-3xl font-semibold">{t("title")}</h1>
             <p className="text-sm text-muted-foreground">
-              Track shipments, filter statuses, and drill into every fulfillment.
+              {t("subtitle")}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -174,11 +181,11 @@ export default function ShipmentsListPage() {
               className="gap-2"
             >
               <Package className="h-4 w-4" />
-              New shipment
+              {t("newShipment")}
             </UiButton>
             <UiButton variant="ghost" className="gap-2" onClick={() => fetchShipments(page)}>
               <RefreshCcw className="h-4 w-4" />
-              Refresh
+              {t("refresh")}
             </UiButton>
           </div>
         </div>
@@ -201,7 +208,7 @@ export default function ShipmentsListPage() {
           <div className="flex items-center gap-2 rounded-2xl border border-border/20 bg-background/60 backdrop-blur-md px-3 py-2 text-xs text-muted-foreground transition hover:border-primary/50">
             <Search className="h-4 w-4" />
             <Input
-              placeholder="Search by code or description"
+              placeholder={t("searchPlaceholder")}
               className="border-0 bg-transparent p-0 text-xs focus-visible:ring-0"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -218,10 +225,10 @@ export default function ShipmentsListPage() {
         <div className="flex items-center justify-between text-xs uppercase tracking-[0.4em] text-muted-foreground/70">
           <div className="flex items-center gap-2">
             <List className="h-4 w-4" />
-            <span>Shipments overview</span>
+            <span>{t("overview")}</span>
           </div>
           <span>
-            Page {page} of {totalPages}
+            {t("pageOf", { current: page.toString(), total: totalPages.toString() })}
           </span>
         </div>
 
@@ -240,13 +247,13 @@ export default function ShipmentsListPage() {
             }
             emptyMessage={
               isLoading
-                ? "Loading shipments..."
-                : "No shipments found. Create a shipment to get started."
+                ? t("loading")
+                : t("empty")
             }
           />
           <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
             <div>
-              Showing {filteredShipments.length} of {data?.total ?? 0} shipments
+              {t("showing", { count: filteredShipments.length.toString(), total: (data?.total ?? 0).toString() })}
             </div>
             <div className="flex items-center gap-2">
               <UiButton
@@ -255,7 +262,7 @@ export default function ShipmentsListPage() {
                 disabled={page <= 1}
                 onClick={() => setPage((prev) => Math.max(1, prev - 1))}
               >
-                Prev
+                {t("prev")}
               </UiButton>
               <UiButton
                 variant="outline"
@@ -263,7 +270,7 @@ export default function ShipmentsListPage() {
                 disabled={page >= totalPages}
                 onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
               >
-                Next
+                {t("next")}
               </UiButton>
             </div>
           </div>

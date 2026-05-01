@@ -62,6 +62,7 @@ const formatPhoneNumberToE164 = (value: string | undefined) => {
 export default function ProfilePage() {
   const { user, getValidAccessToken } = useAuth();
   const t = useI18n("profile");
+  const tValidation = useI18n("newShipment");
   const router = useRouter();
   
   const [profile, setProfile] = useState<NormalizedMerchantProfile | null>(null);
@@ -112,7 +113,7 @@ export default function ProfilePage() {
       }
     } catch (err) {
       console.error("Failed to fetch profile:", err);
-      toast.error("Failed to load profile");
+      toast.error(t("errorLoad") || "Failed to load profile");
     } finally {
       setIsLoading(false);
     }
@@ -139,11 +140,16 @@ export default function ProfilePage() {
       const token = await getValidAccessToken();
       if (!token) return;
 
+      const phone = profile.phone_number?.trim();
+      if (phone && !/^\+251\d{9}$/.test(phone)) {
+        toast.error(tValidation("validation.phoneInvalid"));
+        setIsSaving(false);
+        return;
+      }
+
       const formData = new FormData();
       
       const fields = [
-        "first_name",
-        "last_name",
         "company_name", 
         "company_address", 
         "industry", 
@@ -179,16 +185,16 @@ export default function ProfilePage() {
       });
 
       if (res.ok) {
-        toast.success(t("success"));
+        toast.success(t("successUpdate"));
         setLogoFile(null);
         fetchProfile();
       } else {
         const errorData = await res.json().catch(() => ({}));
-        toast.error(merchantApiErrorMessage(errorData) || t("error"));
+        toast.error(merchantApiErrorMessage(errorData) || t("errorUpdate"));
       }
     } catch (err) {
       console.error("Failed to update profile:", err);
-      toast.error(t("error"));
+      toast.error(t("errorUpdate"));
     } finally {
       setIsSaving(false);
     }
@@ -226,7 +232,7 @@ export default function ProfilePage() {
               <div className="flex items-center gap-3">
                 <img src={dispatchLogo.src} alt="Dispatch" className="h-7 w-auto" />
                 <span className="text-xs text-muted-foreground/50 font-medium uppercase tracking-widest hidden sm:block">
-                  Merchant
+                  {t("title")}
                 </span>
               </div>
             </div>
@@ -245,43 +251,23 @@ export default function ProfilePage() {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <User className="h-5 w-5 text-primary" />
-                  Profile Information
+                  {t("personalInfo")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-border/40 pb-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="first_name">First Name</Label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50" />
-                      <Input 
-                        id="first_name" 
-                        className="pl-9 bg-background/50"
-                        value={profile?.first_name || ""} 
-                        onChange={(e) => setProfile(p => p ? { ...p, first_name: e.target.value } : null)}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="last_name">Last Name</Label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50" />
-                      <Input 
-                        id="last_name" 
-                        className="pl-9 bg-background/50"
-                        value={profile?.last_name || ""} 
-                        onChange={(e) => setProfile(p => p ? { ...p, last_name: e.target.value } : null)}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Logo Upload */}
-                <div className="flex flex-col sm:flex-row items-center gap-6 pb-4 border-b border-border/40 pt-4">
+                <div className="flex flex-col sm:flex-row items-center gap-6 pb-4 border-b border-border/40">
                   <div className="relative group">
                     <div className="w-24 h-24 rounded-2xl bg-primary/10 border-2 border-dashed border-primary/20 flex items-center justify-center overflow-hidden transition-all group-hover:border-primary/40">
                       {displayedLogoUrl ? (
-                        <img src={displayedLogoUrl} alt="Logo Preview" className="w-full h-full object-cover" />
+                        <img
+                          src={displayedLogoUrl}
+                          alt="Logo Preview"
+                          className="w-full h-full object-cover"
+                          onError={(event) => {
+                            event.currentTarget.onerror = null;
+                            event.currentTarget.src = dispatchLogo.src;
+                          }}
+                        />
                       ) : (
                         <Building2 className="h-10 w-10 text-primary/40" />
                       )}
@@ -303,7 +289,7 @@ export default function ProfilePage() {
                   <div className="flex-1 text-center sm:text-left">
                     <h3 className="text-sm font-medium">{t("companyLogo")}</h3>
                     <p className="text-xs text-muted-foreground mt-1 mb-3">
-                      Recommended: Square JPG or PNG, max 2MB.
+                      {t("logoRecommended")}
                     </p>
                     <Button 
                       type="button" 
@@ -376,7 +362,7 @@ export default function ProfilePage() {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Phone className="h-5 w-5 text-primary" />
-                  Contact Information
+                  {t("businessInfo")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -389,7 +375,7 @@ export default function ProfilePage() {
                         id="phone_number" 
                         type="tel"
                         inputMode="tel"
-                        placeholder="+251 9xx xxx xxx"
+                        placeholder={t("phonePlaceholder") || "+2519xxxxxxxx"}
                         className="pl-9 bg-background/50"
                         value={profile?.phone_number || ""} 
                         onChange={(e) => setProfile(p => p ? { ...p, phone_number: e.target.value } : null)}
@@ -406,7 +392,7 @@ export default function ProfilePage() {
                         className="pl-9 bg-background/50"
                         value={profile?.website_url || ""} 
                         onChange={(e) => setProfile(p => p ? { ...p, website_url: e.target.value } : null)}
-                        placeholder="https://example.com"
+                        placeholder="https://..."
                       />
                     </div>
                   </div>
@@ -419,7 +405,7 @@ export default function ProfilePage() {
                   onClick={() => router.push("/merchant")}
                   className="rounded-lg"
                 >
-                  Cancel
+                  {t("cancel")}
                 </Button>
                 <Button 
                   type="submit" 

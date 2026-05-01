@@ -15,6 +15,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Key,
+  Webhook,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import dispatchLogo from "@/assets/dispatch-logo.png";
@@ -23,15 +24,19 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { buildMerchantLogoProxyUrl } from "@/lib/merchantProfile";
 
-const NAV_ITEMS = [
-  { label: "Dashboard", href: "/merchant", icon: Package },
-  { label: "Shipments", href: "/merchant/shipments", icon: List },
-  { label: "Couriers", href: "/merchant/couriers", icon: Truck },
-  { label: "API Keys", href: "/merchant/api-keys", icon: Key },
-];
+import { useI18n } from "@/intl";
 
 export default function MerchantLayout({ children }: { children: React.ReactNode }) {
+  const tNav = useI18n("nav_merchant");
   const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const NAV_ITEMS = [
+    { label: tNav("dashboard"), href: "/merchant", icon: Package },
+    { label: tNav("shipments"), href: "/merchant/shipments", icon: List },
+    { label: tNav("couriers"), href: "/merchant/couriers", icon: Truck },
+    { label: tNav("apiKeys"), href: "/merchant/api-keys", icon: Key },
+    { label: tNav("webhooks"), href: "/merchant/webhooks", icon: Webhook },
+  ];
   const pathname = usePathname();
   const { logout, user, getValidAccessToken } = useAuth();
   const [profile, setProfile] = useState<any>(null);
@@ -148,7 +153,15 @@ export default function MerchantLayout({ children }: { children: React.ReactNode
                 <div className="relative flex-shrink-0 flex items-center justify-center">
                   {logoUrl ? (
                     <div className={cn("rounded-xl border border-border/50 overflow-hidden bg-background/50 transition-all duration-300", isCollapsed ? "h-10 w-10" : "h-10 w-10 mr-4")}>
-                      <img src={logoUrl} alt="Business Logo" className="h-full w-full object-cover" />
+                      <img
+                        src={logoUrl}
+                        alt="Business Logo"
+                        className="h-full w-full object-cover"
+                        onError={(event) => {
+                          event.currentTarget.onerror = null;
+                          event.currentTarget.src = dispatchLogo.src;
+                        }}
+                      />
                     </div>
                   ) : (
                     <User className={cn("h-5 w-5 flex-shrink-0 transition-transform duration-300", isCollapsed ? "mx-auto" : "mr-4")} />
@@ -167,7 +180,7 @@ export default function MerchantLayout({ children }: { children: React.ReactNode
             
             <div className="flex items-center rounded-2xl p-3 text-muted-foreground hover:bg-muted/60 hover:text-foreground transition-all duration-300 cursor-pointer border border-transparent">
               <Settings className={cn("h-5 w-5 flex-shrink-0 transition-transform duration-300", isCollapsed ? "mx-auto" : "mr-4")} />
-              {!isCollapsed && <span className="text-sm font-medium tracking-wide">System Settings</span>}
+              {!isCollapsed && <span className="text-sm font-medium tracking-wide">{tNav("settings")}</span>}
             </div>
 
             <div className={cn("flex items-center", isCollapsed ? "flex-col gap-3 mx-auto" : "flex-row justify-between px-3 py-1")}>
@@ -180,7 +193,7 @@ export default function MerchantLayout({ children }: { children: React.ReactNode
               className="group flex w-full items-center rounded-2xl p-3 text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all duration-300 border border-transparent"
             >
               <LogOut className={cn("h-5 w-5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110", isCollapsed ? "mx-auto" : "mr-4")} />
-              {!isCollapsed && <span className="text-sm font-medium tracking-wide">Log Out</span>}
+              {!isCollapsed && <span className="text-sm font-medium tracking-wide">{tNav("logout")}</span>}
             </button>
           </div>
         </motion.aside>
