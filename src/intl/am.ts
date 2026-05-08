@@ -443,10 +443,11 @@ const am: Messages = {
     placeholder: "የምርት ቁልፍ",
     generate: "ቁልፍ ፍጠር",
     table: {
-      name: "የቁልፍ ስም",
+      name: "የቁልፍ መለያ (ID)",
       key: "የ API ቁልፍ",
       status: "ሁኔታ",
-      created: "የተፈጠረበት",
+      createdAt: "የተፈጠረበት",
+      lastActivity: "ለመጨረሻ ጊዜ ጥቅም ላይ የዋለ",
       actions: "እርምጃዎች",
     },
     active: "ንቁ",

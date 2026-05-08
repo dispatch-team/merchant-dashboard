@@ -181,10 +181,16 @@ export default function WebhooksPage() {
     },
     {
       key: "CreatedAt",
-      header: tApiKeys("table.created"),
+      header: tApiKeys("table.createdAt"),
       render: (item: WebhookType) => (
-        <span className="text-[11px] text-muted-foreground">
-          {new Date(item.CreatedAt).toLocaleDateString()}
+        <span className="text-[11px] text-muted-foreground whitespace-nowrap">
+          {new Date(item.CreatedAt).toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })}
         </span>
       ),
     },

@@ -115,8 +115,14 @@ export default function ShipmentsListPage() {
       key: "created_at",
       header: t("columns.created"),
       render: (item: ShipmentResponse) => (
-        <span className="text-[11px] text-muted-foreground">
-          {isClient && item.created_at ? new Date(item.created_at).toLocaleString() : "—"}
+        <span className="text-[11px] text-muted-foreground whitespace-nowrap">
+          {isClient && item.created_at ? new Date(item.created_at).toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          }) : "—"}
         </span>
       ),
     },

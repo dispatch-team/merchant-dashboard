@@ -162,7 +162,7 @@ export default function APIKeysPage() {
   const columns: any[] = [
     {
       key: "ID",
-      header: t("table.name"),
+      header: t("table.name") === "table.name" ? "Key ID" : t("table.name"),
       render: (item: APIKeyMetadata) => (
         <span className="font-mono text-[10px] text-muted-foreground uppercase opacity-70">
           #{item.ID}
@@ -186,22 +186,34 @@ export default function APIKeysPage() {
     },
     {
       key: "last_used_at",
-      header: t("table.created"),
+      header: t("table.lastActivity") === "table.lastActivity" ? "Last Used" : t("table.lastActivity"),
       render: (item: APIKeyMetadata) => {
         const neverUsed = item.last_used_at.startsWith("0001-01-01");
         return (
-          <span className="text-[11px] text-muted-foreground">
-            {neverUsed ? "—" : new Date(item.last_used_at).toLocaleString()}
+          <span className="text-[11px] text-muted-foreground whitespace-nowrap">
+            {neverUsed ? "—" : new Date(item.last_used_at).toLocaleString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
           </span>
         );
       },
     },
     {
       key: "CreatedAt",
-      header: t("table.created"),
+      header: t("table.createdAt") === "table.createdAt" ? "Created At" : t("table.createdAt"),
       render: (item: APIKeyMetadata) => (
-        <span className="text-[11px] text-muted-foreground">
-          {new Date(item.CreatedAt).toLocaleString()}
+        <span className="text-[11px] text-muted-foreground whitespace-nowrap">
+          {new Date(item.CreatedAt).toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })}
         </span>
       ),
     },

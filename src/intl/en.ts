@@ -443,10 +443,11 @@ const en = {
     placeholder: "Production Key",
     generate: "Generate Key",
     table: {
-      name: "Key Name",
+      name: "Key ID",
       key: "API Key",
       status: "Status",
-      created: "Created",
+      createdAt: "Created At",
+      lastActivity: "Last Used",
       actions: "Actions",
     },
     active: "Active",
