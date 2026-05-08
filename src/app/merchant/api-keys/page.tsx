@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { EmptyState } from "@/components/EmptyState";
 
 export default function APIKeysPage() {
   const t = useI18n("apiKeys");
@@ -312,7 +313,17 @@ export default function APIKeysPage() {
             columns={columns}
             data={keys as any}
             keyExtractor={(item: any) => item.ID}
-            emptyMessage={isLoading ? tShipments("loading") : tShipments("empty")}
+            emptyMessage={isLoading ? tShipments("loading") : t("empty")}
+            emptyContent={
+              <EmptyState 
+                icon={<Key />}
+                title={t("empty")}
+                description={t("emptyDesc")}
+                actionLabel={t("newKey")}
+                onAction={handleGenerate}
+                isLoading={isLoading}
+              />
+            }
           />
         </div>
       </section>

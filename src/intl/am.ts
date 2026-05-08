@@ -423,7 +423,8 @@ const am: Messages = {
       actions: "እርምጃዎች",
     },
     viewDetails: "ዝርዝሮችን ይመልከቱ",
-    empty: "ምንም ጭነቶች አልተገኙም። ለመጀመር ጭነት ይፍጠሩ።",
+    empty: "ምንም ጭነቶች አልተገኙም",
+    emptyDesc: "እስካሁን ምንም ጭነቶች አልፈጠሩም። እዚህ ለማየት የመጀመሪያዎን ጭነት ይጀምሩ።",
     loading: "ጭነቶች በመጫን ላይ...",
     prev: "ቀዳሚ",
     next: "ቀጣይ",
@@ -470,6 +471,8 @@ const am: Messages = {
     savedKey: "ቁልፉን አስቀምጫለሁ",
     successCreate: "የ API ቁልፍ በትክክል ተፈጥሯል!",
     successDelete: "የ API ቁልፍ በትክክል ተሰርዟል!",
+    empty: "ምንም የ API ቁልፎች አልተገኙም",
+    emptyDesc: "Dispatchን ከራስዎ ሲስተሞች ጋር ማገናኘት ለመጀመር የ API ቁልፍ ይፍጠሩ።",
   },
 
   // ─── Webhooks ──────────────────────────────────────────────────────────────
@@ -482,6 +485,8 @@ const am: Messages = {
     urlLabel: "የመድረሻ ድረ-ገጽ",
     successCreate: "ዌብሁክ በተሳካ ሁኔታ ተዋቅሯል",
     successDelete: "ዌብሁክ ተወግዷል",
+    empty: "ምንም ዌብሁኮች አልተገኙም",
+    emptyDesc: "ስለ ጭነቶችዎ ሁኔታ ቅጽበታዊ ማሳወቂያዎችን ለማግኘት ዌብሁክ ይመዝግቡ።",
     table: {
       url: "ኤንድፖይንት",
       status: "ሁኔታ",
@@ -619,7 +624,9 @@ const am: Messages = {
     refreshDetails: "ዝርዝሮችን አድስ",
     newShipment: "አዲስ ጭነት",
     generateCode: "የማረጋገጫ ኮድ ይፍጠሩ",
+    regenerateCode: "የማረጋገጫ ኮድ እንደገና ይፍጠሩ",
     generating: "በመፍጠር ላይ...",
+    regenerating: "እንደገና በመፍጠር ላይ...",
     codeGenerated: "ኮድ ተፈጥሯል",
     noCouriersDesc_part1: "ጭነቶችን ለእነሱ ለመመደብ በ ",
     noCouriersDesc_part2: " ገጽ ላይ ኩሪየሮችን እንደ አጋር ያክሉ።",

@@ -22,6 +22,7 @@ interface DataTableProps<T> {
   keyExtractor: (item: T) => string;
   onRowClick?: (item: T) => void;
   emptyMessage?: string;
+  emptyContent?: ReactNode;
 }
 
 export function DataTable<T extends Record<string, unknown>>({
@@ -30,6 +31,7 @@ export function DataTable<T extends Record<string, unknown>>({
   keyExtractor,
   onRowClick,
   emptyMessage = "No data available",
+  emptyContent,
 }: DataTableProps<T>) {
   return (
     <div className="rounded-lg border border-border bg-card overflow-hidden">
@@ -45,9 +47,13 @@ export function DataTable<T extends Record<string, unknown>>({
         </TableHeader>
         <TableBody>
           {data.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-16 text-center text-muted-foreground text-sm">
-                {emptyMessage}
+            <TableRow className="hover:bg-transparent">
+              <TableCell colSpan={columns.length} className="p-0 border-0">
+                {emptyContent || (
+                  <div className="h-24 flex items-center justify-center text-muted-foreground text-sm">
+                    {emptyMessage}
+                  </div>
+                )}
               </TableCell>
             </TableRow>
           ) : (

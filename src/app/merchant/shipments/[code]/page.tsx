@@ -2,7 +2,7 @@
 
 import { use, useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Loader2, Star } from "lucide-react";
+import { ArrowLeft, Loader2, Star, Package } from "lucide-react";
 import { AuthGuard } from "@/components/AuthGuard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,8 @@ import {
   ShipmentUpdatePayload,
   updateShipment,
 } from "@/lib/shipments";
+import { AddressAutocomplete } from "@/components/AddressAutocomplete";
+import { parseAddress, AutocompleteResult } from "@/lib/addresses";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useI18n } from "@/intl";
@@ -33,10 +35,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Spoiler } from "@/components/ui/spoiler";
 
 type FormValues = {
   start_address: string;
+  start_latitude?: number;
+  start_longitude?: number;
   end_address: string;
+  end_latitude?: number;
+  end_longitude?: number;
   description: string;
   recipient_name: string;
   recipient_phone: string;
@@ -161,7 +168,11 @@ export default function ShipmentDetailsPage({ params }: ShipmentDetailsPageProps
   const [ratingSubmitting, setRatingSubmitting] = useState(false);
   const [formValues, setFormValues] = useState<FormValues>({
     start_address: "",
+    start_latitude: undefined,
+    start_longitude: undefined,
     end_address: "",
+    end_latitude: undefined,
+    end_longitude: undefined,
     description: "",
     recipient_name: "",
     recipient_phone: "",
@@ -214,11 +225,29 @@ export default function ShipmentDetailsPage({ params }: ShipmentDetailsPageProps
       if (!token) return;
 
       const details = await getShipmentDetails(token, shipmentCode);
-      setShipment(details);
+      
+      // Check for persisted confirmation code in localStorage as a fallback
+      const persistedCode = localStorage.getItem(`conf_code_${shipmentCode}`);
+      let finalConfirmationCode = details.confirmation_code;
+      
+      if (persistedCode && !finalConfirmationCode) {
+        finalConfirmationCode = persistedCode;
+      } else if (finalConfirmationCode) {
+        // Sync back to localStorage if API has it
+        localStorage.setItem(`conf_code_${shipmentCode}`, finalConfirmationCode);
+      }
+
+      const shipmentWithCode = { ...details, confirmation_code: finalConfirmationCode };
+      setShipment(shipmentWithCode);
+
       const parsedDescription = parseDescriptionDetails(details.description);
       setFormValues({
         start_address: details.start_address || "",
+        start_latitude: details.start_latitude,
+        start_longitude: details.start_longitude,
         end_address: details.end_address || "",
+        end_latitude: details.end_address_latitude,
+        end_longitude: details.end_address_longitude,
         description: parsedDescription.description,
         recipient_name: parsedDescription.recipient_name,
         recipient_phone: parsedDescription.recipient_phone,
@@ -238,6 +267,34 @@ export default function ShipmentDetailsPage({ params }: ShipmentDetailsPageProps
       setIsLoading(false);
     }
   }, [getValidAccessToken, shipmentCode]);
+
+  const handleParseAddress = useCallback(async (name: "start_address" | "end_address", address: string) => {
+    try {
+      const token = await getValidAccessToken();
+      if (!token) return;
+      const result = await parseAddress(token, address);
+      
+      if (result) {
+        setFormValues(prev => ({
+          ...prev,
+          [`${name === "start_address" ? "start" : "end"}_latitude`]: result.latitude,
+          [`${name === "start_address" ? "start" : "end"}_longitude`]: result.longitude,
+        }));
+      }
+    } catch (err) {
+      console.error("Failed to parse address:", err);
+    }
+  }, [getValidAccessToken]);
+
+  const handleAddressSelect = (name: "start_address" | "end_address", result: AutocompleteResult) => {
+    setFormValues(prev => ({ 
+      ...prev, 
+      [name]: result.name,
+      [`${name === "start_address" ? "start" : "end"}_latitude`]: result.lat,
+      [`${name === "start_address" ? "start" : "end"}_longitude`]: result.lng,
+    }));
+    handleParseAddress(name, result.name);
+  };
 
   useEffect(() => {
     refreshShipment();
@@ -281,10 +338,16 @@ export default function ShipmentDetailsPage({ params }: ShipmentDetailsPageProps
       };
 
       if (formValues.start_address !== (shipment.start_address || "")) {
-        payload.start_address = formValues.start_address;
+        const hasCoords = formValues.start_latitude && formValues.start_longitude;
+        payload.start_address = hasCoords 
+          ? `${formValues.start_latitude}; ${formValues.start_longitude}`
+          : formValues.start_address;
       }
       if (formValues.end_address !== (shipment.end_address || "")) {
-        payload.end_address = formValues.end_address;
+        const hasCoords = formValues.end_latitude && formValues.end_longitude;
+        payload.end_address = hasCoords 
+          ? `${formValues.end_latitude}; ${formValues.end_longitude}`
+          : formValues.end_address;
       }
       const newDescription = buildDescriptionPayload(formValues);
       if (newDescription !== (shipment.description || "")) {
@@ -322,7 +385,11 @@ export default function ShipmentDetailsPage({ params }: ShipmentDetailsPageProps
       const parsedUpdatedDescription = parseDescriptionDetails(updated.description);
       setFormValues({
         start_address: updated.start_address || "",
+        start_latitude: updated.start_latitude,
+        start_longitude: updated.start_longitude,
         end_address: updated.end_address || "",
+        end_latitude: updated.end_address_latitude,
+        end_longitude: updated.end_address_longitude,
         description: parsedUpdatedDescription.description,
         recipient_name: parsedUpdatedDescription.recipient_name,
         recipient_phone: parsedUpdatedDescription.recipient_phone,
@@ -349,9 +416,18 @@ export default function ShipmentDetailsPage({ params }: ShipmentDetailsPageProps
       const token = await getValidAccessToken();
       if (!token) return;
 
-      await generateConfirmationCode(token, shipmentCode);
-      toast.success(t("successCode"));
-      await refreshShipment();
+      const result = await generateConfirmationCode(token, shipmentCode) as any;
+      
+      // If the result contains the code, update state and persist it
+      const newCode = result?.confirmation_code || result?.code;
+      if (newCode) {
+        localStorage.setItem(`conf_code_${shipmentCode}`, newCode);
+        setShipment(prev => prev ? { ...prev, confirmation_code: newCode } : null);
+        toast.success(`${t("successCode")}: ${newCode}`);
+      } else {
+        toast.success(t("successCode"));
+        await refreshShipment();
+      }
     } catch (err: any) {
       console.error("Failed to generate confirmation code:", err);
       setActionError(err.message || t("errorUpdate"));
@@ -475,10 +551,17 @@ export default function ShipmentDetailsPage({ params }: ShipmentDetailsPageProps
                         <p className="text-xs text-muted-foreground uppercase tracking-wide">{t("code")}</p>
                         <p className="font-mono text-sm">{shipment.code || shipment.id}</p>
                       </div>
-                      {shipment.confirmation_code && (
-                        <div className="flex items-center justify-between bg-primary/5 p-2 rounded-lg border border-primary/20">
-                          <p className="text-xs text-primary font-bold uppercase tracking-wide">{t("confirmationCode")}</p>
-                          <p className="font-mono text-lg font-bold text-primary tracking-wider">{shipment.confirmation_code}</p>
+                      {(shipment.confirmation_code || shipment.confirmation_code === "") && (
+                        <div className="flex items-center justify-between bg-primary/10 p-4 rounded-2xl border border-primary/30 shadow-inner">
+                          <div>
+                            <p className="text-[10px] text-primary font-bold uppercase tracking-widest mb-1">{t("confirmationCode")}</p>
+                            <Spoiler className="font-mono text-2xl font-black text-primary tracking-[0.2em]">
+                              {shipment.confirmation_code || "PENDING"}
+                            </Spoiler>
+                          </div>
+                          <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                            <Package className="h-5 w-5 text-primary" />
+                          </div>
                         </div>
                       )}
                       <div className="grid gap-4 border-t border-border/40 pt-4 text-sm">
@@ -653,22 +736,24 @@ export default function ShipmentDetailsPage({ params }: ShipmentDetailsPageProps
                         </div>
                       </CardHeader>
                       <CardContent className="space-y-5">
-                        <div className="grid gap-3">
-                          <label className="text-xs text-muted-foreground">{t("pickup")}</label>
-                          <Input
+                        <div className="grid gap-5">
+                          <AddressAutocomplete
+                            label={t("pickup")}
+                            name="start_address"
                             value={formValues.start_address}
-                            onChange={(event) =>
-                              setFormValues((prev) => ({ ...prev, start_address: event.target.value }))
-                            }
+                            onChange={(e) => setFormValues(prev => ({ ...prev, start_address: e.target.value }))}
+                            onBlur={(e) => handleParseAddress("start_address", e.target.value)}
+                            onSelect={(result) => handleAddressSelect("start_address", result)}
                           />
                         </div>
-                        <div className="grid gap-3">
-                          <label className="text-xs text-muted-foreground">{t("destination")}</label>
-                          <Input
+                        <div className="grid gap-5">
+                          <AddressAutocomplete
+                            label={t("destination")}
+                            name="end_address"
                             value={formValues.end_address}
-                            onChange={(event) =>
-                              setFormValues((prev) => ({ ...prev, end_address: event.target.value }))
-                            }
+                            onChange={(e) => setFormValues(prev => ({ ...prev, end_address: e.target.value }))}
+                            onBlur={(e) => handleParseAddress("end_address", e.target.value)}
+                            onSelect={(result) => handleAddressSelect("end_address", result)}
                           />
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -782,17 +867,17 @@ export default function ShipmentDetailsPage({ params }: ShipmentDetailsPageProps
                       </Button>
                       <Button
                         className="w-full"
-                        variant="default"
+                        variant={shipment.confirmation_code ? "outline" : "default"}
                         onClick={handleGenerateConfirmationCode}
-                        disabled={isGeneratingCode || isUpdating || isDeleting || !!shipment.confirmation_code}
+                        disabled={isGeneratingCode || isUpdating || isDeleting}
                       >
                         {isGeneratingCode ? (
                           <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            {t("generating")}
+                            {shipment.confirmation_code ? t("regenerating") : t("generating")}
                           </>
                         ) : shipment.confirmation_code ? (
-                          t("codeGenerated")
+                          t("regenerateCode")
                         ) : (
                           t("generateCode")
                         )}

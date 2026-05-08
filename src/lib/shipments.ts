@@ -3,6 +3,12 @@ export interface ShipmentPayload {
   merchant_user_id: string;
   start_address: string;
   end_address: string;
+  start_latitude?: number;
+  start_longitude?: number;
+  start_subcity?: string;
+  end_address_latitude?: number;
+  end_address_longitude?: number;
+  end_subcity?: string;
   description: string;
   weight_kg?: number;
   dimensions?: string;
@@ -18,6 +24,12 @@ export interface ShipmentResponse {
   merchant_user_id: string;
   start_address: string;
   end_address: string;
+  start_latitude?: number;
+  start_longitude?: number;
+  start_subcity?: string;
+  end_address_latitude?: number;
+  end_address_longitude?: number;
+  end_subcity?: string;
   description: string;
   weight_kg?: number;
   dimensions?: string;
@@ -108,6 +120,12 @@ export interface ShipmentUpdatePayload {
   merchant_user_id?: string;
   start_address?: string;
   end_address?: string;
+  start_latitude?: number;
+  start_longitude?: number;
+  start_subcity?: string;
+  end_address_latitude?: number;
+  end_address_longitude?: number;
+  end_subcity?: string;
   description?: string;
   weight_kg?: number;
   dimensions?: string;

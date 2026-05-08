@@ -215,7 +215,7 @@ export default function LoginPage() {
           <img
             src={dispatchLogo.src}
             alt="Dispatch"
-            className="h-28 w-auto mx-auto mb-10 drop-shadow-[0_0_30px_hsl(270,70%,60%,0.2)]"
+            className="h-32 w-auto mx-auto mb-10 drop-shadow-[0_0_30px_hsl(270,70%,60%,0.2)]"
           />
           <h2 className="text-3xl font-bold text-foreground mb-3 tracking-tight">
             {t("welcomeBack")}
@@ -246,7 +246,7 @@ export default function LoginPage() {
         <div className="w-full max-w-sm">
           {/* Mobile logo */}
           <Link href="/" className="lg:hidden flex justify-center mb-10">
-            <img src={dispatchLogo.src} alt="Dispatch" className="h-20 w-auto" />
+            <img src={dispatchLogo.src} alt="Dispatch" className="h-24 w-auto" />
           </Link>
 
           {/* Role header */}

@@ -136,7 +136,7 @@ export default function RegisterPage() {
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:48px_48px]" />
 
         <div className="relative max-w-md text-center px-8">
-          <img src={dispatchLogo.src} alt="Dispatch" className="h-28 w-auto mx-auto mb-10 drop-shadow-[0_0_30px_hsl(270,70%,60%,0.2)]" />
+          <img src={dispatchLogo.src} alt="Dispatch" className="h-32 w-auto mx-auto mb-10 drop-shadow-[0_0_30px_hsl(270,70%,60%,0.2)]" />
           <h2 className="text-3xl font-bold text-foreground mb-3 tracking-tight">{t("title")}</h2>
           <p className="text-muted-foreground leading-relaxed mb-10">
             {t("subtitle")}
@@ -174,7 +174,7 @@ export default function RegisterPage() {
 
         <div className="w-full max-w-sm mt-12 mb-12">
           <Link href="/" className="lg:hidden flex justify-center mb-8">
-            <img src={dispatchLogo.src} alt="Dispatch" className="h-20 w-auto" />
+            <img src={dispatchLogo.src} alt="Dispatch" className="h-24 w-auto" />
           </Link>
 
           <h1 className="text-xl font-bold text-foreground mb-1 tracking-tight">{t("headline")}</h1>

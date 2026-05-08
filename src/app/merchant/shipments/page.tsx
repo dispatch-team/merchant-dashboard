@@ -10,6 +10,7 @@ import { DataTable } from "@/components/DataTable";
 import { useAuth } from "@/context/AuthContext";
 import { getShipments, ShipmentListResponse, ShipmentResponse } from "@/lib/shipments";
 import { useI18n } from "@/intl";
+import { EmptyState } from "@/components/EmptyState";
 
 const pageSize = 10;
 
@@ -245,10 +246,16 @@ export default function ShipmentsListPage() {
             onRowClick={(item) =>
               router.push(`/merchant/shipments/${encodeURIComponent(item.code ?? item.id)}`)
             }
-            emptyMessage={
-              isLoading
-                ? t("loading")
-                : t("empty")
+            emptyMessage={isLoading ? t("loading") : t("empty")}
+            emptyContent={
+              <EmptyState
+                icon={<Package />}
+                title={t("empty")}
+                description={t("emptyDesc")}
+                actionLabel={t("newShipment")}
+                onAction={() => router.push("/merchant/shipments/new")}
+                isLoading={isLoading}
+              />
             }
           />
           <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">

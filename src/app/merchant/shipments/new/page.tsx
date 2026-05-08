@@ -29,11 +29,19 @@ import { createShipment } from "@/lib/shipments";
 import { toast } from "sonner";
 import dispatchLogo from "@/assets/dispatch-logo.png";
 import { useI18n } from "@/intl";
+import { AddressAutocomplete } from "@/components/AddressAutocomplete";
+import { parseAddress, AutocompleteResult } from "@/lib/addresses";
 
 interface FormFields {
   courier_company_id: string;
   start_address: string;
+  start_latitude?: number;
+  start_longitude?: number;
+  start_subcity?: string;
   end_address: string;
+  end_latitude?: number;
+  end_longitude?: number;
+  end_subcity?: string;
   recipient_name: string;
   recipient_phone: string;
   description: string;
@@ -214,14 +222,63 @@ export default function NewShipmentPage() {
   }
 
   function handleBlur(e: React.FocusEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
-    const { name } = e.target;
+    const { name, value } = e.target as any;
     setTouched((prev) => ({ ...prev, [name]: true }));
     const errs = validate(fields, selectedCourier, t);
     setErrors((prev) => ({
       ...prev,
       [name]: errs[name as keyof FormErrors],
     }));
+
+    // Parse address if it's an address field and has content
+    if ((name === "start_address" || name === "end_address") && value.trim()) {
+      handleParseAddress(name as "start_address" | "end_address", value.trim());
+    }
   }
+
+  async function handleParseAddress(name: "start_address" | "end_address", address: string) {
+    try {
+      const token = await getValidAccessToken();
+      if (!token) return;
+      const result = await parseAddress(token, address);
+      
+      // Store coordinates and subcity if found
+      if (result) {
+        setFields(prev => ({
+          ...prev,
+          [`${name === "start_address" ? "start" : "end"}_latitude`]: result.latitude,
+          [`${name === "start_address" ? "start" : "end"}_longitude`]: result.longitude,
+          [`${name === "start_address" ? "start" : "end"}_subcity`]: result.subcity,
+        }));
+      }
+      
+      console.log(`Address parsed and pinned: ${address}`, result);
+    } catch (err) {
+      console.error("Failed to parse address:", err);
+    }
+  }
+
+  const handleAddressSelect = (name: "start_address" | "end_address", result: AutocompleteResult) => {
+    const updated = { 
+      ...fields, 
+      [name]: result.name,
+      [`${name === "start_address" ? "start" : "end"}_latitude`]: result.lat,
+      [`${name === "start_address" ? "start" : "end"}_longitude`]: result.lng,
+      [`${name === "start_address" ? "start" : "end"}_subcity`]: result.subcity,
+    };
+    setFields(updated);
+    setTouched((prev) => ({ ...prev, [name]: true }));
+    
+    // Also parse it to ensure it's "pinned" as per user requirements
+    handleParseAddress(name, result.name);
+
+    // Revalidate
+    const errs = validate(updated, selectedCourier, t);
+    setErrors((prev) => ({
+      ...prev,
+      [name]: errs[name as keyof FormErrors],
+    }));
+  };
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -263,12 +320,28 @@ export default function NewShipmentPage() {
         : [];
 
       const courierId = parseInt(fields.courier_company_id, 10);
+      
+      // Format addresses as "lat; lng" if coordinates are available
+      const formattedStartAddress = fields.start_latitude && fields.start_longitude 
+        ? `${fields.start_latitude}; ${fields.start_longitude}` 
+        : fields.start_address.trim();
+        
+      const formattedEndAddress = fields.end_latitude && fields.end_longitude 
+        ? `${fields.end_latitude}; ${fields.end_longitude}` 
+        : fields.end_address.trim();
+
       const payload: Record<string, unknown> = {
         courier_company_id: courierId,
-        CourierCompanyID: courierId, // Extra safety: some backend versions expect PascalCase
+        CourierCompanyID: courierId,
         merchant_user_id: user?.sub ?? "",
-        start_address: fields.start_address.trim(),
-        end_address: fields.end_address.trim(),
+        start_address: formattedStartAddress,
+        start_latitude: fields.start_latitude,
+        start_longitude: fields.start_longitude,
+        start_subcity: fields.start_subcity,
+        end_address: formattedEndAddress,
+        end_address_latitude: fields.end_latitude,
+        end_address_longitude: fields.end_longitude,
+        end_subcity: fields.end_subcity,
         description: fullDescription,
         items,
       };
@@ -456,28 +529,30 @@ export default function NewShipmentPage() {
 
                 {/* ── Section: Addresses ── */}
                 <FormSection title={t("sections.addresses")} icon={<MapPin className="h-4 w-4 text-primary" />}>
-                  <div className="space-y-4">
-                    <FormField
+                  <div className="space-y-6">
+                    <AddressAutocomplete
                       label={t("fields.pickupAddress")}
                       required
                       name="start_address"
                       placeholder="e.g. Bole Road, Addis Ababa"
-                      icon={<MapPin className="h-3.5 w-3.5" />}
+                      icon={<MapPin className="h-4 w-4" />}
                       value={fields.start_address}
                       error={errors.start_address}
                       onChange={handleChange}
                       onBlur={handleBlur}
+                      onSelect={(result) => handleAddressSelect("start_address", result)}
                     />
-                    <FormField
+                    <AddressAutocomplete
                       label={t("fields.destinationAddress")}
                       required
                       name="end_address"
                       placeholder="e.g. Piassa, Addis Ababa"
-                      icon={<MapPin className="h-3.5 w-3.5" />}
+                      icon={<MapPin className="h-4 w-4" />}
                       value={fields.end_address}
                       error={errors.end_address}
                       onChange={handleChange}
                       onBlur={handleBlur}
+                      onSelect={(result) => handleAddressSelect("end_address", result)}
                     />
                   </div>
                 </FormSection>

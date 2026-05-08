@@ -423,7 +423,8 @@ const en = {
       actions: "Actions",
     },
     viewDetails: "View Details",
-    empty: "No shipments found. Create a shipment to get started.",
+    empty: "No shipments found",
+    emptyDesc: "It looks like you haven't created any shipments yet. Start your first delivery to see it here.",
     loading: "Loading shipments...",
     prev: "Prev",
     next: "Next",
@@ -470,6 +471,8 @@ const en = {
     savedKey: "I've saved the key",
     successCreate: "API key generated successfully!",
     successDelete: "API key deleted successfully!",
+    empty: "No API keys found",
+    emptyDesc: "Generate an API key to start integrating Dispatch with your own systems.",
   },
 
   // ─── Webhooks ──────────────────────────────────────────────────────────────
@@ -482,6 +485,8 @@ const en = {
     urlLabel: "Target URL",
     successCreate: "Webhook configured successfully",
     successDelete: "Webhook removed",
+    empty: "No webhooks found",
+    emptyDesc: "Register a webhook to receive real-time notifications about your shipment status changes.",
     table: {
       url: "Endpoint",
       status: "Status",
@@ -621,7 +626,9 @@ const en = {
     refreshDetails: "Refresh details",
     newShipment: "New Shipment",
     generateCode: "Generate Confirmation Code",
+    regenerateCode: "Regenerate Confirmation Code",
     generating: "Generating...",
+    regenerating: "Regenerating...",
     codeGenerated: "Code Generated",
     noCouriersDesc_part1: "Add carriers as partners on the ",
     noCouriersDesc_part2: " page to assign shipments to them.",

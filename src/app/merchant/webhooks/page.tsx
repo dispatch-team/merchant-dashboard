@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { EmptyState } from "@/components/EmptyState";
 
 export default function WebhooksPage() {
   const t = useI18n("webhooks");
@@ -279,7 +280,17 @@ export default function WebhooksPage() {
             columns={columns}
             data={webhooks as any}
             keyExtractor={(item: any) => item.ID}
-            emptyMessage={isLoading ? tShipments("loading") : tShipments("empty")}
+            emptyMessage={isLoading ? tShipments("loading") : t("empty")}
+            emptyContent={
+              <EmptyState 
+                icon={<Webhook />}
+                title={t("empty")}
+                description={t("emptyDesc")}
+                actionLabel={t("addWebhook")}
+                onAction={() => setIsRegisterDialogOpen(true)}
+                isLoading={isLoading}
+              />
+            }
           />
         </div>
       </section>

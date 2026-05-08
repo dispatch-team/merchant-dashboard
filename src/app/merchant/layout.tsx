@@ -76,7 +76,7 @@ export default function MerchantLayout({ children }: { children: React.ReactNode
           className="relative z-20 flex flex-col border-r border-border/40 bg-card/60 backdrop-blur-2xl transition-shadow duration-300 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.5)] h-full"
         >
           {/* Header */}
-          <div className="flex items-center p-6 h-24 mb-2">
+          <div className="flex items-center p-6 h-28 mb-2">
             <AnimatePresence mode="wait">
               {!isCollapsed ? (
                 <motion.div
@@ -87,7 +87,7 @@ export default function MerchantLayout({ children }: { children: React.ReactNode
                   transition={{ duration: 0.2 }}
                   className="flex items-center justify-center overflow-hidden w-full"
                 >
-                  <img src={dispatchLogo.src} alt="Dispatch Logo" className="h-20 w-auto object-contain drop-shadow-[0_0_15px_hsl(270,70%,60%,0.2)]" />
+                  <img src={dispatchLogo.src} alt="Dispatch Logo" className="h-24 w-auto object-contain drop-shadow-[0_0_15px_hsl(270,70%,60%,0.2)]" />
                 </motion.div>
               ) : (
                 <motion.div
@@ -98,7 +98,7 @@ export default function MerchantLayout({ children }: { children: React.ReactNode
                   transition={{ duration: 0.2 }}
                   className="w-full flex justify-center"
                 >
-                  <img src={dispatchLogo.src} alt="Dispatch Logo" className="h-[4.5rem] w-[4.5rem] object-contain drop-shadow-[0_0_15px_hsl(270,70%,60%,0.2)]" />
+                  <img src={dispatchLogo.src} alt="Dispatch Logo" className="h-20 w-20 object-contain drop-shadow-[0_0_15px_hsl(270,70%,60%,0.2)]" />
                 </motion.div>
               )}
             </AnimatePresence>

@@ -24,6 +24,7 @@ import { motion, Variants } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { buildMerchantLogoProxyUrl } from "@/lib/merchantProfile";
 import { useI18n } from "@/intl";
+import { EmptyState } from "@/components/EmptyState";
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -380,18 +381,14 @@ export default function MerchantDashboard() {
               </div>
             </div>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-center min-h-[300px] bg-background/20 rounded-[2rem] border border-dashed border-border/40 p-8">
-              <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                <Package className="h-8 w-8 text-primary/50" />
-              </div>
-              <p className="text-foreground font-semibold mb-2">{t("latestDeparture.noShipments")}</p>
-              <p className="text-sm text-muted-foreground max-w-[200px] leading-relaxed">
-                {t("latestDeparture.noShipmentsSubtitle")}
-              </p>
-              <Button onClick={() => router.push('/merchant/shipments/new')} className="mt-6 rounded-xl shadow-md h-10 px-6 font-semibold">
-                {t("latestDeparture.createFirst")}
-              </Button>
-            </div>
+            <EmptyState
+              icon={<Package />}
+              title={t("latestDeparture.noShipments")}
+              description={t("latestDeparture.noShipmentsSubtitle")}
+              actionLabel={t("latestDeparture.createFirst")}
+              onAction={() => router.push('/merchant/shipments/new')}
+              className="flex-1 min-h-[360px] py-12"
+            />
           )}
         </div>
 
