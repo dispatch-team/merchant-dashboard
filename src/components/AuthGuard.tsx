@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Loader2 } from "lucide-react";
@@ -15,10 +15,16 @@ interface AuthGuardProps {
 export function AuthGuard({ children, allowedRoles, loginPath }: AuthGuardProps) {
   const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
+  const [isClient, setIsClient] = useState(false);
   // Prevent calling router.replace() more than once during a single render cycle
   const hasRedirected = useRef(false);
 
   useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isClient) return;
     if (isLoading) return;
     if (hasRedirected.current) return;
 
@@ -41,18 +47,21 @@ export function AuthGuard({ children, allowedRoles, loginPath }: AuthGuardProps)
       // Redirect to home, NOT back to loginPath — prevents bounce loop
       router.replace("/");
     }
-  }, [isAuthenticated, isLoading, user, allowedRoles, loginPath, router]);
+  }, [isAuthenticated, isLoading, user, allowedRoles, loginPath, router, isClient]);
 
   // Reset the redirect guard when auth state loads fresh
   useEffect(() => {
     if (!isLoading) {
       hasRedirected.current = false;
     }
-  }, [isLoading, isAuthenticated]);
+  }, [isLoading]);
 
-  if (isLoading) {
+  if (!isClient || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div 
+        className="min-h-screen flex items-center justify-center bg-background"
+        suppressHydrationWarning
+      >
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );

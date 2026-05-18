@@ -1,28 +1,22 @@
 /**
  * English translations for Dispatch
- *
- * HOW TO EDIT:
- *  - All user-facing strings live here.
- *  - Add a matching key in `am.ts` for every key you add here.
- *  - Nest keys by feature/page so the file stays easy to navigate.
- *  - Never use em dashes (--) in strings; use commas or colons instead.
  */
 
-const en = {
+export const en = {
   // ─── Brand ──────────────────────────────────────────────────────────────────
   brand: {
     name: "Dispatch",
-    tagline: "Unified Logistics Platform",
+    tagline: "The Unified Logistics Platform",
     description:
-      "The middleware that bridges merchants with courier providers, simplifying shipment creation, courier selection, and delivery tracking through one powerful platform.",
+      "Dispatch connects merchants with courier providers, simplifying shipment creation, courier selection, and delivery tracking in one powerful dashboard.",
   },
 
   // ─── Navigation ─────────────────────────────────────────────────────────────
   nav: {
     features: "Features",
-    howItWorks: "How It Works",
+    howItWorks: "How it Works",
     portals: "Portals",
-    login: "Log in",
+    login: "Log In",
     getStarted: "Get Started",
   },
 
@@ -31,6 +25,9 @@ const en = {
     dashboard: "Dashboard",
     shipments: "Shipments",
     couriers: "Couriers",
+    shipmentAnalytics: "Shipment Analytics",
+    apiUsage: "API Usage",
+    courierComparison: "Courier Comparison",
     apiKeys: "API Keys",
     webhooks: "Webhooks",
     profile: "Profile",
@@ -58,179 +55,181 @@ const en = {
     courierPartners: "Courier Partners",
     activeMerchants: "Active Merchants",
     deliveriesCompleted: "Deliveries Completed",
-    avgDeliveryTime: "Avg Delivery Time",
   },
 
-  // ─── Features Section ────────────────────────────────────────────────────────
+  // ─── Features ───────────────────────────────────────────────────────────────
   features: {
-    sectionLabel: "Platform",
-    headline1: "Everything you need.",
-    headline2: "Nothing you don't.",
-    shipmentManagement: {
-      title: "Shipment Management",
-      description:
-        "Create, track, and manage shipments across multiple courier providers from one unified dashboard.",
-    },
-    fleetCoordination: {
-      title: "Fleet Coordination",
-      description:
-        "Real-time driver tracking, intelligent route management, and delivery confirmation workflows.",
-    },
-    performanceAnalytics: {
-      title: "Performance Analytics",
-      description:
-        "Compare courier performance, delivery times, and success rates with interactive analytics.",
-    },
-    apiIntegration: {
-      title: "API Integration",
-      description:
-        "RESTful API with key management for seamless e-commerce platform integration.",
-    },
-    locationIntelligence: {
-      title: "Location Intelligence",
-      description:
-        "Landmark-based location resolution tailored for Addis Ababa's unique addressing system.",
-    },
-    courierRatings: {
-      title: "Courier Ratings",
-      description:
-        "Rate and compare courier providers based on real delivery performance data.",
+    title: "Why Dispatch?",
+    subtitle: "Everything you need to scale your delivery operations in Ethiopia.",
+    items: {
+      unified: {
+        title: "Unified Courier API",
+        desc: "Connect once, reach every courier. Our single API abstracts the complexity of multiple providers.",
+      },
+      automated: {
+        title: "Automated Selection",
+        desc: "Choose the best courier for every shipment based on price, speed, and reliability.",
+      },
+      tracking: {
+        title: "Real-time Tracking",
+        desc: "Keep your customers informed with precise, real-time tracking for every single package.",
+      },
     },
   },
 
   // ─── How It Works ───────────────────────────────────────────────────────────
   howItWorks: {
-    sectionLabel: "Process",
-    headline: "Get started in minutes.",
-    step1: {
-      title: "Register",
-      description:
-        "Create your merchant account with business details and get instant platform access.",
-    },
-    step2: {
-      title: "Choose Courier",
-      description:
-        "Browse available couriers, compare pricing, performance metrics, and delivery zones.",
-    },
-    step3: {
-      title: "Ship and Track",
-      description:
-        "Create shipments, track in real-time, get proof of delivery, and analyze logistics.",
+    title: "How It Works",
+    subtitle: "Three simple steps to streamline your logistics.",
+    steps: {
+      connect: {
+        title: "Connect",
+        desc: "Register as a merchant and integrate our lightweight API or use our intuitive dashboard.",
+      },
+      ship: {
+        title: "Ship",
+        desc: "Create shipments and instantly see available courier partners with transparent pricing.",
+      },
+      track: {
+        title: "Track",
+        desc: "Monitor your deliveries in real-time and receive automated status updates via webhooks.",
+      },
     },
   },
 
-  // ─── Portals Section ────────────────────────────────────────────────────────
+  // ─── Portals ───────────────────────────────────────────────────────────────
   portals: {
-    sectionLabel: "Portals",
-    headline: "Built for every role.",
-    subheading:
-      "Dedicated dashboards tailored to each stakeholder in the delivery chain.",
+    title: "Explore our Portals",
+    subtitle: "Tailored experiences for every stakeholder in the ecosystem.",
     merchant: {
-      title: "Merchant",
-      description: "Create shipments, compare couriers, and track deliveries.",
+      title: "Merchant Portal",
+      desc: "Manage orders, partners, and business analytics.",
+      action: "Merchant Login",
     },
     supervisor: {
-      title: "Courier Supervisor",
-      description: "Manage drivers, assign shipments, and monitor fleet.",
+      title: "Supervisor Portal",
+      desc: "Oversee courier operations and driver management.",
+      action: "Supervisor Login",
     },
     admin: {
-      title: "Administrator",
-      description: "Oversee the platform, couriers, and system metrics.",
+      title: "Admin Portal",
+      desc: "Global system configuration and platform monitoring.",
+      action: "Admin Login",
     },
   },
 
-  // ─── CTA Section ────────────────────────────────────────────────────────────
+  // ─── CTA ───────────────────────────────────────────────────────────────────
   cta: {
-    headline1: "Ready to streamline",
-    headline2: "your logistics?",
-    subheading:
-      "Join Dispatch and connect your business to Addis Ababa's courier network today.",
-    createAccount: "Create Merchant Account",
-    courierLogin: "Courier Login",
+    title: "Ready to simplify your deliveries?",
+    subtitle: "Join the growing network of merchants using Dispatch to reach their customers faster.",
+    button: "Create Your Account",
   },
 
-  // ─── Footer ─────────────────────────────────────────────────────────────────
+  // ─── Footer ────────────────────────────────────────────────────────────────
   footer: {
-    copyright: "© 2026 Dispatch. Built for Addis Ababa.",
-    merchant: "Merchant",
-    supervisor: "Supervisor",
-    downloadDriverApp: "Download Driver App",
-    admin: "Admin",
+    rights: "© {year} Dispatch. All rights reserved.",
+    links: {
+      privacy: "Privacy Policy",
+      terms: "Terms of Service",
+      contact: "Contact Support",
+    },
   },
 
-  // ─── Login Page ─────────────────────────────────────────────────────────────
+  // ─── Login ─────────────────────────────────────────────────────────────────
   login: {
-    welcomeBack: "Welcome back",
-    platformDescription:
-      "Unified logistics platform connecting merchants and courier providers in Addis Ababa.",
-    back: "Back",
-    emailLabel: "Email",
-    emailPlaceholder: "you@example.com",
-    passwordLabel: "Password",
-    forgotPassword: "Forgot password?",
-    signIn: "Sign In",
-    signingIn: "Signing in...",
-    switchPortal: "Switch portal",
-
-    // Role labels and subtitles
+    merchant: {
+      title: "Merchant Login",
+      subtitle: "Access your logistics dashboard",
+    },
+    admin: {
+      title: "Admin Login",
+      subtitle: "System administration and monitoring",
+    },
+    supervisor: {
+      title: "Supervisor Login",
+      subtitle: "Courier operations management",
+    },
+    username: "Username",
+    password: "Password",
+    submit: "Log In",
+    loggingIn: "Logging in...",
+    error: "Invalid credentials or server error.",
+    noAccount: "Don't have an account?",
+    register: "Register now",
+    welcomeBack: "Welcome Back",
+    platformDescription: "Dispatch connects merchants with courier providers, simplifying shipment creation, courier selection, and delivery tracking in one powerful dashboard.",
+    back: "Back to Home",
     roles: {
       merchant: {
-        label: "Merchant",
-        subtitle: "Manage shipments and track deliveries",
-      },
-      supervisor: {
-        label: "Courier Supervisor",
-        subtitle: "Manage drivers and fleet operations",
+        label: "Merchant Portal",
+        subtitle: "Access your logistics dashboard",
       },
       admin: {
-        label: "Administrator",
-        subtitle: "Oversee platform operations and metrics",
+        label: "Admin Portal",
+        subtitle: "System administration and monitoring",
+      },
+      supervisor: {
+        label: "Supervisor Portal",
+        subtitle: "Courier operations management",
       },
     },
-
-    // Validation errors
+    lockout: {
+      message: "Too many failed attempts. Locked out for {time}.",
+    },
+    emailLabel: "Email Address",
+    emailPlaceholder: "name@company.com",
+    passwordLabel: "Password",
+    forgotPassword: "Forgot password?",
+    signingIn: "Signing in...",
+    signIn: "Sign In",
+    switchPortal: "Switch Portal",
     validation: {
-      emailRequired: "Email is required.",
+      emailRequired: "Email address is required.",
       emailInvalid: "Please enter a valid email address.",
-      emailTooLong: "Email must be less than 255 characters.",
+      emailTooLong: "Email address is too long.",
       passwordRequired: "Password is required.",
       passwordTooShort: "Password must be at least 8 characters.",
     },
-
-    // Lockout
-    lockout: {
-      message: "Too many failed attempts. Please try again in {time}.",
-    },
   },
 
-  // ─── Register Page ──────────────────────────────────────────────────────────
+  // ─── Register ──────────────────────────────────────────────────────────────
   register: {
-    title: "Join Dispatch",
-    subtitle: "Register your business and start managing shipments with the best couriers in Addis Ababa.",
+    title: "Create Merchant Account",
+    subtitle: "Start shipping with Dispatch today",
+    username: "Username",
+    email: "Email Address",
+    password: "Password",
+    companyName: "Company Name",
+    submit: "Register",
+    registering: "Registering...",
+    error: "Registration failed. Please try again.",
+    hasAccount: "Already have an account?",
+    login: "Log in here",
+    success: "Registration successful! You can now log in.",
     headline: "Create Merchant Account",
-    subheadline: "Register your business to start using Dispatch",
+    subheadline: "Start shipping with Dispatch today",
     steps: {
       account: {
-        title: "Create your account",
-        desc: "Register with your business details",
+        title: "Create Account",
+        desc: "Sign up and set up your merchant profile.",
       },
       courier: {
-        title: "Choose a courier",
-        desc: "Browse and compare courier providers",
+        title: "Connect Couriers",
+        desc: "Partner with top delivery providers in Addis Ababa.",
       },
       shipping: {
-        title: "Start shipping",
-        desc: "Create shipments and track deliveries",
+        title: "Start Shipping",
+        desc: "Book deliveries and track them in real-time.",
       },
     },
     fields: {
       firstName: "First Name",
       lastName: "Last Name",
-      businessName: "Business Name",
+      businessName: "Company Name",
       address: "Company Address",
       industry: "Industry",
       phone: "Phone Number",
-      email: "Email",
+      email: "Email Address",
       website: "Website URL (Optional)",
       description: "Business Description (Optional)",
       password: "Password",
@@ -239,142 +238,163 @@ const en = {
     placeholders: {
       firstName: "John",
       lastName: "Doe",
-      businessName: "Your Company Ltd.",
-      address: "Bole Road, Addis Ababa, Ethiopia",
-      industry: "Logistics",
+      businessName: "Acme Corp",
+      address: "Bole, Addis Ababa",
+      industry: "E-commerce",
       phone: "+2519xxxxxxxx",
-      email: "you@business.com",
+      email: "name@company.com",
       website: "https://example.com",
-      description: "Describe your business...",
+      description: "Tell us about your business...",
     },
-    validation: {
-      firstName: "First name is required",
-      lastName: "Last name is required",
-      businessName: "Business name is required",
-      address: "Address is required",
-      industry: "Industry is required",
-      phoneRequired: "Phone number is required",
-      phoneInvalid: "Phone must be in +251XXXXXXXXX format",
-      emailInvalid: "Valid email is required",
-      passwordShort: "Password must be at least 8 characters",
-      passwordMismatch: "Passwords do not match",
-    },
-    button: "Create Account",
-    creating: "Creating Account...",
-    success: "Account created successfully!",
+    creating: "Creating account...",
+    button: "Register",
     alreadyHaveAccount: "Already have an account?",
-    signIn: "Sign in",
+    signIn: "Log in here",
+    validation: {
+      firstName: "First name is required.",
+      lastName: "Last name is required.",
+      businessName: "Business name is required.",
+      address: "Business address is required.",
+      industry: "Industry is required.",
+      phoneRequired: "Phone number is required.",
+      phoneInvalid: "Please enter a valid phone number (e.g. +2519xxxxxxxx).",
+      emailInvalid: "Please enter a valid email address.",
+      passwordShort: "Password must be at least 8 characters.",
+      passwordMismatch: "Passwords do not match.",
+    },
   },
 
-  // ─── Dashboard ──────────────────────────────────────────────────────────────
+  // ─── Dashboard ─────────────────────────────────────────────────────────────
   merchantDashboard: {
-    title: "Merchant",
     welcome: "Welcome back",
-    welcomeSubtitle: "Here is what is happening with your shipments today.",
+    defaultUser: "Merchant",
     at: "at",
     liveOverview: "Live Overview",
+    welcomeSubtitle: "Here's what's happening with your business today.",
     syncData: "Sync Data",
-    errorAuth: "Missing authentication token",
-    errorLoadOverview: "Failed to load shipment overview",
-    defaultUser: "Merchant",
     stats: {
+      totalShipments: "Total Shipments",
+      activeDeliveries: "Active Deliveries",
+      deliveredToday: "Delivered Today",
+      pendingPickups: "Pending Pickups",
       activeShipments: "Active Shipments",
       totalCreated: "Total Created",
       pendingReview: "Pending Review",
-      deliveryRate: "Delivery Rate",
+      deliveryRate: "Delivery Success",
       actionNeeded: "Action Needed",
     },
-    latestDeparture: {
-      title: "Latest Departure",
-      subtitle: "Recent activity",
-      viewAll: "View All",
-      trackingId: "Tracking ID",
-      route: "Route",
-      carrier: "Carrier partner",
-      details: "Package details",
-      contents: "Contents",
-      noShipments: "No shipments yet",
-      noShipmentsSubtitle: "Your latest shipment will appear here once created.",
-      createFirst: "Create your first shipment",
-      loading: "Retrieving shipment data...",
-      noDescription: "No description provided",
-      originUnset: "Origin unset",
-      destinationUnset: "Destination unset",
-      unassigned: "Unassigned",
-      weightUnspecified: "Weight unspecified",
-      dimensionsNA: "Dimensions N/A",
-      noItems: "No items listed",
-      createdAt: "Created",
-      fee: "Fee",
-      currency: "ETB ",
-      retry: "Retry Connection",
-    },
+    recentShipments: "Recent Shipments",
+    viewAll: "View All",
     quickActions: {
-      title: "Quick Actions",
-      subtitle: "Shortcuts",
+      subtitle: "Quick Actions",
+      title: "Next Steps",
       newShipment: {
         label: "New Shipment",
-        desc: "Create and dispatch shipments in seconds",
+        desc: "Book a new delivery with a courier partner."
+      },
+      manageCouriers: {
+        label: "Manage Couriers",
+        desc: "View and connect with courier providers."
+      },
+      apiUsage: {
+        label: "API Usage",
+        desc: "Monitor your integration metrics."
       },
       shipments: {
         label: "Shipments",
-        desc: "View tracking and delivery reports",
+        desc: "View your delivery history."
       },
       couriers: {
         label: "Couriers",
-        desc: "Compare courier partners and fees",
-      },
+        desc: "Manage your partner network."
+      }
     },
+    latestDeparture: {
+      subtitle: "Last Activity",
+      title: "Latest Shipment",
+      viewAll: "See History",
+      loading: "Loading latest shipment...",
+      retry: "Retry",
+      createdAt: "Created",
+      trackingId: "Tracking ID",
+      noDescription: "No description provided",
+      route: "Route",
+      originUnset: "Origin not set",
+      destinationUnset: "Destination not set",
+      carrier: "Courier",
+      unassigned: "Unassigned",
+      details: "Package Details",
+      weightUnspecified: "Weight unspecified",
+      dimensionsNA: "Dimensions N/A",
+      contents: "Contents",
+      noItems: "No items listed",
+      fee: "Total Fee",
+      currency: "ETB",
+      noShipments: "No Shipments Yet",
+      noShipmentsSubtitle: "Your latest shipment will appear here once you start sending.",
+      createFirst: "Create First Shipment",
+    }
   },
 
-  // ─── Couriers ───────────────────────────────────────────────────────────────
+  // ─── Courier List ──────────────────────────────────────────────────────────
   couriers: {
-    title: "Courier partnerships",
-    subtitle: "Discover delivery networks and manage partners across Addis Ababa.",
-    searchPlaceholder: "Search couriers…",
-    searchLabel: "Search couriers",
+    title: "Courier Partners",
+    subtitle: "Manage your relationships with delivery providers.",
+    all: "All Providers",
+    partners: "My Partners",
+    searchPlaceholder: "Search couriers...",
+    searchLabel: "Search",
     filters: "Filters",
+    empty: "No couriers found matching your criteria.",
     stats: {
-      network: "Couriers in network",
-      partners: "Your partners",
-      notPartnered: "Not partnered yet",
+      network: "Total Network",
+      partners: "Your Partners",
+      notPartnered: "Not Partnered"
     },
     tabs: {
-      all: "All couriers",
-      partners: "Partners",
+      all: "All Couriers",
+      partners: "My Partners"
     },
-    filterActive: "Filter: \"{query}\"",
-    availableCouriers: "Available couriers",
-    partnerCouriers: "Partner couriers",
-    results: "{count} results",
-    connecting: "Connecting to courier network...",
-    loadingPartners: "Loading partners...",
-    noResultsSearch: "No couriers match your search. Change the query and press the search button.",
-    noResultsAvailable: "No couriers are available right now.",
-    noResultsPartners: "You have not added any courier partners yet. Browse all couriers to add one.",
+    filterActive: "Filter active: {query}",
+    availableCouriers: "Available Couriers",
+    partnerCouriers: "Partner Couriers",
+    results: "{count} Results",
+    connecting: "Connecting to network...",
+    loadingPartners: "Loading partner data...",
+    noResultsSearch: "No couriers match your search query.",
+    noResultsAvailable: "No couriers are currently available.",
+    noResultsPartners: "You haven't added any partner couriers yet.",
     card: {
       partnerBadge: "Partner",
       availableBadge: "Available",
-      privateEmail: "Private",
-      feesLimits: "Fees & limits",
-      basePrice: "Base price",
+      privateEmail: "Private Email",
+      feesLimits: "Fees & Limits",
+      basePrice: "Base Price",
       distance: "Distance",
       weight: "Weight",
       perKm: "/km",
       perKg: "/kg",
       capacity: "Capacity",
-      maxLoad: "{weight} kg max load",
-      visitSite: "Visit site",
-      viewDetails: "View details",
+      maxLoad: "Max Load: {weight}kg",
+      visitSite: "Visit Website",
+      viewDetails: "View Details"
     },
-    errorAuth: "Unable to authenticate courier network",
-    errorLoad: "Failed to load couriers",
+    partnership: {
+      active: "Partnered",
+      inactive: "Not Partnered",
+    },
+    viewProfile: "View Profile",
   },
 
-  // ─── Profile ────────────────────────────────────────────────────────────────
+  // ─── Merchant Profile ──────────────────────────────────────────────────────
   profile: {
-    title: "Account Profile",
-    subtitle: "Manage your personal and business information.",
+    title: "Account Settings",
+    subtitle: "Manage your merchant profile and business details.",
+    tabs: {
+      general: "General",
+      business: "Business",
+      security: "Security",
+    },
     personalInfo: "Personal Information",
     businessInfo: "Business Information",
     fullName: "Full Name",
@@ -432,6 +452,17 @@ const en = {
     pageOf: "Page {current} of {total}",
     errorAuth: "Missing authentication context",
     errorLoad: "Unable to load shipments",
+    statuses: {
+      pending: "Pending",
+      assigned_to_courier: "Assigned to Courier",
+      assigned_to_driver: "Assigned to Driver",
+      picked_up: "Picked Up",
+      in_transit: "In Transit",
+      delivered: "Delivered",
+      cancelled: "Cancelled",
+      failed: "Failed",
+      unknown: "Unknown",
+    },
   },
 
   // ─── API Keys ──────────────────────────────────────────────────────────────
@@ -705,6 +736,87 @@ const en = {
       weightPositive: "Weight must be a positive number.",
       weightExceeds: "Weight exceeds {name}'s maximum of {weight} kg.",
     },
+  },
+
+  // ─── Analytics ─────────────────────────────────────────────────────────────
+  shipmentAnalytics: {
+    title: "Shipment Analytics",
+    subtitle: "Monitor your delivery performance and identification operational trends.",
+    filters: {
+      range: "Time Range",
+      last24Hours: "Last 24 Hours",
+      last7Days: "Last 7 Days",
+      last30Days: "Last 30 Days",
+      courier: "Courier",
+      status: "Status",
+      allCouriers: "All Couriers",
+      allStatuses: "All Statuses",
+    },
+    metrics: {
+      totalShipments: "Total Shipments",
+      successRate: "Success Rate",
+      avgDeliveryTime: "Avg. Delivery Time",
+      volumeOverTime: "Average Shipment Volume",
+      vsLastPeriod: "vs last period",
+    },
+    charts: {
+      volumeLine: "Shipment Volume Over Time",
+      statusDistribution: "Status Distribution",
+      performanceByCourier: "Performance by Courier",
+    },
+    noData: "No data available for the selected range.",
+    error: "Unable to retrieve analytics data.",
+    todo: {
+      description: "As an authenticated merchant, I want to view analytical summaries of my shipments, so that I can assess delivery performance and identify operational trends.",
+    }
+  },
+
+  apiUsage: {
+    title: "API Usage Metrics",
+    subtitle: "Monitor your integration activity and system consumption.",
+    filters: {
+      last24Hours: "Last 24 Hours",
+      last7Days: "Last 7 Days",
+      last30Days: "Last 30 Days",
+    },
+    metrics: {
+      totalRequests: "Total Requests",
+      requestsOverTime: "Requests Over Time",
+      breakdownByKey: "Breakdown by API Key",
+      activeKeys: "Active Keys",
+      healthScore: "Health Score",
+      last24h: "Last 24h",
+      usagePerCredential: "Usage per API credential",
+      requests: "Requests",
+    },
+    empty: "No API activity found.",
+    error: "Unable to retrieve API usage data.",
+    unauthorized: "You do not have permission to view these metrics.",
+    noData: "No API activity recorded in this period.",
+  },
+
+  courierComparison: {
+    title: "Courier Comparison",
+    subtitle: "Compare providers based on performance to make informed decisions.",
+    filters: {
+      range: "Time Range",
+      last24Hours: "Last 24 Hours",
+      last7Days: "Last 7 Days",
+      last30Days: "Last 30 Days",
+    },
+    metrics: {
+      successRate: "Delivery Success Rate",
+      avgTime: "Avg. Delivery Time",
+      hours: "hours",
+      success: "Success",
+    },
+    emptyState: {
+      description: "You need data from at least two different courier providers to generate a comparison report.",
+      action: "Book with another courier",
+    },
+    notPossible: "Comparison not possible: at least two couriers with data are required.",
+    incompleteWarning: "Warning: Data for some couriers is incomplete, which may limit comparison accuracy.",
+    error: "Unable to retrieve comparison data.",
   },
 } as const;
 

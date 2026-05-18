@@ -43,6 +43,7 @@ const itemVariants: Variants = {
 
 export default function MerchantDashboard() {
   const t = useI18n("merchantDashboard");
+  const tShipments = useI18n("shipments");
   const { user, getValidAccessToken } = useAuth();
 
   const QUICK_ACTIONS = [
@@ -181,9 +182,16 @@ export default function MerchantDashboard() {
   }, []);
 
   const formatDate = (date?: string) => {
-    if (!isClient) return "—";
     return date ? new Date(date).toLocaleString() : "—";
   };
+
+  if (!isClient) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary/50" />
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -318,7 +326,7 @@ export default function MerchantDashboard() {
                   className="uppercase tracking-[0.2em] font-bold px-3 py-1 rounded-xl"
                   variant={latestShipment.status?.toLowerCase() === 'pending' ? 'secondary' : 'default'}
                 >
-                  {latestShipment.status || "—"}
+                  {latestShipment.status ? tShipments(`statuses.${latestShipment.status.toLowerCase()}` as any) : tShipments("statuses.unknown")}
                 </Badge>
                 <div className="w-px h-4 bg-border/50" />
                 <p className="text-[11px] font-medium text-muted-foreground tracking-wide">

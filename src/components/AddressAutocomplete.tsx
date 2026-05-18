@@ -95,21 +95,21 @@ export function AddressAutocomplete({
   };
 
   const hasError = !!error;
-  const inputCls = `w-full ${icon ? "pl-9" : "pl-3"} pr-10 rounded-xl border text-sm bg-background/40 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/30 ${
+  const inputCls = `w-full ${icon ? "pl-12" : "pl-5"} pr-12 rounded-full border text-sm bg-background/30 backdrop-blur-md transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 ${
     hasError
-      ? "border-destructive/50 bg-destructive/5 focus:ring-destructive/20"
-      : "border-border/40 focus:border-primary/40"
+      ? "border-destructive/40 bg-destructive/5 focus:ring-destructive/10"
+      : "border-border/40 focus:border-primary/40 focus:bg-background/50"
   }`;
 
   return (
     <div className="relative" ref={containerRef}>
-      <label className="block text-xs font-medium text-muted-foreground mb-1.5">
-        {label} {required && <span className="text-destructive">*</span>}
+      <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 pl-1">
+        {label} {required && <span className="text-destructive font-bold">*</span>}
       </label>
 
       <div className="relative">
         {icon && (
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 pointer-events-none z-10">
+          <span className="absolute left-4.5 top-1/2 -translate-y-1/2 text-muted-foreground/40 pointer-events-none z-10" style={{ left: "1.25rem" }}>
             {icon}
           </span>
         )}
@@ -120,14 +120,14 @@ export function AddressAutocomplete({
           value={value}
           onChange={handleInputChange}
           onBlur={onBlur}
-          className={`${inputCls} h-10`}
+          className={`${inputCls} h-12`}
           autoComplete="off"
         />
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+        <div className="absolute right-5 top-1/2 -translate-y-1/2 flex items-center gap-2">
           {isLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground/40" />
+            <Loader2 className="h-4 w-4 animate-spin text-primary/50" />
           ) : (
-            <Search className="h-4 w-4 text-muted-foreground/20" />
+            <Search className="h-4 w-4 text-muted-foreground/30" />
           )}
         </div>
       </div>

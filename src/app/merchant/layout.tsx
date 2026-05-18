@@ -12,10 +12,13 @@ import {
   User,
   Settings,
   LogOut,
-  ChevronLeft,
   ChevronRight,
+  ChevronLeft,
   Key,
   Webhook,
+  BarChart3,
+  Zap,
+  Scale,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import dispatchLogo from "@/assets/dispatch-logo.png";
@@ -36,6 +39,9 @@ export default function MerchantLayout({ children }: { children: React.ReactNode
     { label: tNav("couriers"), href: "/merchant/couriers", icon: Truck },
     { label: tNav("apiKeys"), href: "/merchant/api-keys", icon: Key },
     { label: tNav("webhooks"), href: "/merchant/webhooks", icon: Webhook },
+    { label: tNav("shipmentAnalytics"), href: "/merchant/analytics/shipments", icon: BarChart3 },
+    { label: tNav("apiUsage"), href: "/merchant/analytics/api-usage", icon: Zap },
+    { label: tNav("courierComparison"), href: "/merchant/analytics/couriers", icon: Scale },
   ];
   const pathname = usePathname();
   const { logout, user, getValidAccessToken } = useAuth();
