@@ -9,18 +9,18 @@ import {
   Briefcase, 
   FileText, 
   Phone, 
-  Mail, 
   Globe, 
   Camera,
   Loader2,
   Save,
-  User
+  User,
+  ExternalLink,
+  ShieldCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { AuthGuard } from "@/components/AuthGuard";
 import { useAuth } from "@/context/AuthContext";
 import { useI18n } from "@/intl/IntlProvider";
@@ -32,6 +32,7 @@ import {
   mergeMerchantProfileWithJwtUser,
   merchantApiErrorMessage,
 } from "@/lib/merchantProfile";
+import { motion } from "framer-motion";
 
 const DEFAULT_MERCHANT_COUNTRY_CODE = "251";
 
@@ -73,8 +74,6 @@ export default function ProfilePage() {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // If user picked a new file locally → show data URL preview
-  // Otherwise → build the API URL and attach token query param for secure image fetch
   const displayedLogoUrl =
     logoPreview ??
     buildMerchantLogoProxyUrl(profile?.company_logo_id, accessToken);
@@ -202,127 +201,126 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-screen flex flex-col items-center justify-center gap-3">
+        <Loader2 className="h-10 w-10 animate-spin text-primary opacity-60" />
+        <span className="text-sm font-semibold text-muted-foreground/65">Loading profile...</span>
       </div>
     );
   }
 
   return (
     <AuthGuard allowedRoles={["merchant"]} loginPath="/login/merchant">
-      <div className="min-h-screen bg-background text-foreground flex flex-col">
-        {/* Background blobs */}
-        <div className="fixed inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/3 w-[500px] h-[350px] bg-primary/5 rounded-full blur-[120px]" />
-          <div className="absolute bottom-0 right-1/4 w-[400px] h-[300px] bg-accent/5 rounded-full blur-[100px]" />
-        </div>
-
-        {/* Header */}
-        <header className="relative z-20 border-b border-border/40 bg-background/80 backdrop-blur-md sticky top-0">
-          <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => router.push("/merchant")}
-                className="h-8 w-8 rounded-lg"
-              >
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-              <div className="flex items-center gap-3">
-                <img src={dispatchLogo.src} alt="Dispatch" className="h-7 w-auto" />
-                <span className="text-xs text-muted-foreground/50 font-medium uppercase tracking-widest hidden sm:block">
-                  {t("title")}
-                </span>
-              </div>
-            </div>
-          </div>
-        </header>
+      <div className="min-h-screen bg-background text-foreground flex flex-col relative overflow-hidden pb-16">
+        {/* Soft layout background glows */}
+        <div className="absolute top-[-10%] left-[25%] w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none -z-10" />
+        <div className="absolute bottom-[10%] right-[10%] w-[450px] h-[450px] bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none -z-10" />
 
         {/* Main Content */}
-        <main className="relative z-10 flex-1 max-w-3xl w-full mx-auto px-6 py-8">
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
-            <p className="text-muted-foreground">{t("subtitle")}</p>
+        <main className="relative z-10 flex-1 max-w-3xl w-full mx-auto px-6 py-10 space-y-8">
+          
+          {/* CURVY INLINE HEADER (STICKY HEADER BAR REMOVED) */}
+          <div className="flex items-center gap-4 mb-2 px-1">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => router.push("/merchant")}
+              className="rounded-full h-12 w-12 border-border/30 bg-background/30 hover:bg-muted/80 backdrop-blur-md shrink-0 shadow-sm transition-all duration-300 hover:scale-105 active:scale-95"
+            >
+              <ArrowLeft className="h-5 w-5 text-foreground" />
+            </Button>
+            <div>
+              <span className="text-[9px] font-extrabold uppercase tracking-widest text-primary/80 bg-primary/10 border border-primary/20 rounded-full px-3 py-1 block w-fit mb-1.5 shadow-sm">
+                {t("title")}
+              </span>
+              <h1 className="text-2xl font-black tracking-tight text-foreground sm:text-3xl">
+                {t("title")}
+              </h1>
+            </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <Card className="border-border/40 bg-card/60 backdrop-blur-sm shadow-xl">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <User className="h-5 w-5 text-primary" />
-                  {t("personalInfo")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex flex-col sm:flex-row items-center gap-6 pb-4 border-b border-border/40">
-                  <div className="relative group">
-                    <div className="w-24 h-24 rounded-2xl bg-primary/10 border-2 border-dashed border-primary/20 flex items-center justify-center overflow-hidden transition-all group-hover:border-primary/40">
-                      {displayedLogoUrl ? (
-                        <img
-                          src={displayedLogoUrl}
-                          alt="Logo Preview"
-                          className="w-full h-full object-cover"
-                          onError={(event) => {
-                            event.currentTarget.onerror = null;
-                            event.currentTarget.src = dispatchLogo.src;
-                          }}
-                        />
-                      ) : (
-                        <Building2 className="h-10 w-10 text-primary/40" />
-                      )}
-                      <div 
-                        className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                        onClick={() => fileInputRef.current?.click()}
-                      >
-                        <Camera className="h-6 w-6 text-white" />
-                      </div>
-                    </div>
-                    <input 
-                      type="file" 
-                      ref={fileInputRef} 
-                      className="hidden" 
-                      accept="image/*" 
-                      onChange={handleLogoChange}
-                    />
-                  </div>
-                  <div className="flex-1 text-center sm:text-left">
-                    <h3 className="text-sm font-medium">{t("companyLogo")}</h3>
-                    <p className="text-xs text-muted-foreground mt-1 mb-3">
-                      {t("logoRecommended")}
-                    </p>
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => fileInputRef.current?.click()}
-                      className="h-8"
-                    >
-                      {logoPreview ? t("changeLogo") : t("uploadLogo")}
-                    </Button>
-                  </div>
-                </div>
+          <form onSubmit={handleSubmit} className="space-y-8">
+            
+            {/* CARD 1: PERSONAL & COMPANY PROFILE INFO */}
+            <div className="rounded-[2.25rem] border border-border/35 bg-card/40 hover:bg-card/65 backdrop-blur-2xl p-8 shadow-[0_20px_50px_rgba(0,0,0,0.12)] relative overflow-hidden group hover:border-border/60 transition-all duration-300">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-[40px] pointer-events-none" />
+              
+              <h2 className="text-xl font-black tracking-tight text-foreground flex items-center gap-2 mb-1">
+                <User className="h-5 w-5 text-primary" />
+                {t("personalInfo")}
+              </h2>
+              <p className="text-xs text-muted-foreground mb-6 pl-1">{t("subtitle")}</p>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Logo dropzone upload portal */}
+              <div className="flex flex-col sm:flex-row items-center gap-6 pb-6 border-b border-border/10 mb-6">
+                <div className="relative group/logo cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                  <div className="w-24 h-24 rounded-[1.75rem] bg-background/40 border-2 border-dashed border-primary/25 flex items-center justify-center overflow-hidden transition-all duration-300 group-hover/logo:border-primary/60 shadow-inner">
+                    {displayedLogoUrl ? (
+                      <img
+                        src={displayedLogoUrl}
+                        alt="Logo Preview"
+                        className="w-full h-full object-cover group-hover/logo:scale-105 transition-transform duration-300"
+                        onError={(event) => {
+                          event.currentTarget.onerror = null;
+                          event.currentTarget.src = dispatchLogo.src;
+                        }}
+                      />
+                    ) : (
+                      <Building2 className="h-10 w-10 text-primary/40" />
+                    )}
+                    
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover/logo:opacity-100 transition-opacity duration-300">
+                      <Camera className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                  <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    className="hidden" 
+                    accept="image/*" 
+                    onChange={handleLogoChange}
+                  />
+                </div>
+                
+                <div className="flex-1 text-center sm:text-left space-y-1.5">
+                  <h3 className="text-sm font-extrabold text-foreground">{t("companyLogo")}</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    {t("logoRecommended")}
+                  </p>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="rounded-full h-9 px-4 border-border/40 font-bold shadow-sm"
+                  >
+                    {logoPreview ? t("changeLogo") : t("uploadLogo")}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Input grid */}
+              <div className="space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="space-y-2">
-                    <Label htmlFor="company_name">{t("companyName")}</Label>
+                    <Label htmlFor="company_name" className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/60 pl-1">{t("companyName")}</Label>
                     <div className="relative">
-                      <Building2 className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50" />
+                      <Building2 className="absolute left-4 top-3.5 h-4 w-4 text-muted-foreground/40" />
                       <Input 
                         id="company_name" 
-                        className="pl-9 bg-background/50"
+                        className="rounded-full h-12 pl-11 pr-5 bg-background/30 border-border/45 focus-visible:ring-primary/20 font-bold"
                         value={profile?.company_name || ""} 
                         onChange={(e) => setProfile(p => p ? { ...p, company_name: e.target.value } : null)}
                       />
                     </div>
                   </div>
+                  
                   <div className="space-y-2">
-                    <Label htmlFor="industry">{t("industry")}</Label>
+                    <Label htmlFor="industry" className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/60 pl-1">{t("industry")}</Label>
                     <div className="relative">
-                      <Briefcase className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50" />
+                      <Briefcase className="absolute left-4 top-3.5 h-4 w-4 text-muted-foreground/40" />
                       <Input 
                         id="industry" 
-                        className="pl-9 bg-background/50"
+                        className="rounded-full h-12 pl-11 pr-5 bg-background/30 border-border/45 focus-visible:ring-primary/20 font-bold"
                         value={profile?.industry || ""} 
                         onChange={(e) => setProfile(p => p ? { ...p, industry: e.target.value } : null)}
                       />
@@ -331,12 +329,12 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="company_address">{t("companyAddress")}</Label>
+                  <Label htmlFor="company_address" className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/60 pl-1">{t("companyAddress")}</Label>
                   <div className="relative">
-                    <MapPin className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50" />
+                    <MapPin className="absolute left-4 top-3.5 h-4 w-4 text-muted-foreground/40" />
                     <Input 
                       id="company_address" 
-                      className="pl-9 bg-background/50"
+                      className="rounded-full h-12 pl-11 pr-5 bg-background/30 border-border/45 focus-visible:ring-primary/20 font-bold"
                       value={profile?.company_address || ""} 
                       onChange={(e) => setProfile(p => p ? { ...p, company_address: e.target.value } : null)}
                     />
@@ -344,88 +342,92 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description">{t("description")}</Label>
+                  <Label htmlFor="description" className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/60 pl-1">{t("description")}</Label>
                   <div className="relative">
-                    <FileText className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50" />
+                    <FileText className="absolute left-4 top-3.5 h-4 w-4 text-muted-foreground/40" />
                     <Textarea 
                       id="description" 
-                      className="pl-9 bg-background/50 min-h-[100px]"
+                      className="rounded-[1.75rem] pl-11 pr-5 py-3 bg-background/30 border-border/45 focus-visible:ring-primary/20 min-h-[120px] font-semibold"
                       value={profile?.description || ""} 
                       onChange={(e) => setProfile(p => p ? { ...p, description: e.target.value } : null)}
                     />
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
-            <Card className="border-border/40 bg-card/60 backdrop-blur-sm shadow-xl">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Phone className="h-5 w-5 text-primary" />
-                  {t("businessInfo")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="phone_number">{t("phoneNumber")}</Label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50" />
-                      <Input 
-                        id="phone_number" 
-                        type="tel"
-                        inputMode="tel"
-                        placeholder={t("phonePlaceholder") || "+2519xxxxxxxx"}
-                        className="pl-9 bg-background/50"
-                        value={profile?.phone_number || ""} 
-                        onChange={(e) => setProfile(p => p ? { ...p, phone_number: e.target.value } : null)}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="website_url">{t("websiteUrl")}</Label>
-                    <div className="relative">
-                      <Globe className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground/50" />
-                      <Input 
-                        id="website_url" 
-                        type="url"
-                        className="pl-9 bg-background/50"
-                        value={profile?.website_url || ""} 
-                        onChange={(e) => setProfile(p => p ? { ...p, website_url: e.target.value } : null)}
-                        placeholder="https://..."
-                      />
-                    </div>
+            {/* CARD 2: BUSINESS CONTACT CHANNELS */}
+            <div className="rounded-[2.25rem] border border-border/35 bg-card/40 hover:bg-card/65 backdrop-blur-2xl p-8 shadow-[0_20px_50px_rgba(0,0,0,0.12)] relative overflow-hidden group hover:border-border/60 transition-all duration-300">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-[40px] pointer-events-none" />
+              
+              <h2 className="text-xl font-black tracking-tight text-foreground flex items-center gap-2 mb-1">
+                <Phone className="h-5 w-5 text-primary" />
+                {t("businessInfo")}
+              </h2>
+              <p className="text-xs text-muted-foreground mb-6 pl-1">Configure your corporate web URLs and contact details below.</p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="space-y-2">
+                  <Label htmlFor="phone_number" className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/60 pl-1">{t("phoneNumber")}</Label>
+                  <div className="relative">
+                    <Phone className="absolute left-4 top-3.5 h-4 w-4 text-muted-foreground/40" />
+                    <Input 
+                      id="phone_number" 
+                      type="tel"
+                      inputMode="tel"
+                      placeholder={t("phonePlaceholder") || "+2519xxxxxxxx"}
+                      className="rounded-full h-12 pl-11 pr-5 bg-background/30 border-border/45 focus-visible:ring-primary/20 font-mono font-bold"
+                      value={profile?.phone_number || ""} 
+                      onChange={(e) => setProfile(p => p ? { ...p, phone_number: e.target.value } : null)}
+                    />
                   </div>
                 </div>
-              </CardContent>
-              <CardFooter className="pt-2 border-t border-border/40 flex justify-end gap-3 mt-4">
+                
+                <div className="space-y-2">
+                  <Label htmlFor="website_url" className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground/60 pl-1">{t("websiteUrl")}</Label>
+                  <div className="relative">
+                    <Globe className="absolute left-4 top-3.5 h-4 w-4 text-muted-foreground/40" />
+                    <Input 
+                      id="website_url" 
+                      type="url"
+                      className="rounded-full h-12 pl-11 pr-5 bg-background/30 border-border/45 focus-visible:ring-primary/20 font-bold"
+                      value={profile?.website_url || ""} 
+                      onChange={(e) => setProfile(p => p ? { ...p, website_url: e.target.value } : null)}
+                      placeholder="https://..."
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Glass Actions Footer */}
+              <div className="mt-8 border-t border-border/10 pt-6 flex justify-end gap-3.5">
                 <Button 
                   type="button" 
                   variant="ghost" 
                   onClick={() => router.push("/merchant")}
-                  className="rounded-lg"
+                  className="rounded-full h-12 px-6 border border-border/30 font-bold hover:bg-muted/50 transition-colors text-xs"
                 >
                   {t("cancel")}
                 </Button>
                 <Button 
                   type="submit" 
                   disabled={isSaving}
-                  className="rounded-lg gap-2 shadow-lg shadow-primary/20 min-w-[140px]"
+                  className="rounded-full h-12 px-8 bg-primary text-primary-foreground font-black shadow-lg shadow-primary/10 hover:scale-105 transition-all duration-300 min-w-[140px]"
                 >
                   {isSaving ? (
                     <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
                       {t("saving")}
                     </>
                   ) : (
                     <>
-                      <Save className="h-4 w-4" />
+                      <Save className="h-4 w-4 mr-1.5" />
                       {t("saveChanges")}
                     </>
                   )}
                 </Button>
-              </CardFooter>
-            </Card>
+              </div>
+            </div>
           </form>
         </main>
       </div>
