@@ -25,7 +25,7 @@ import { useAuth } from "@/context/AuthContext";
 import { getShipments, ShipmentListResponse, ShipmentResponse } from "@/lib/shipments";
 import { useI18n } from "@/intl";
 import { EmptyState } from "@/components/EmptyState";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 
 const pageSize = 10;
 
@@ -152,7 +152,7 @@ export default function ShipmentsListPage() {
     ];
   }, [data, t]);
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
@@ -162,9 +162,9 @@ export default function ShipmentsListPage() {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 12 },
-    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100 } }
+    show: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 100 } }
   };
 
   return (
