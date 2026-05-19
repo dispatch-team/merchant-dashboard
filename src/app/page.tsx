@@ -76,7 +76,7 @@ export default function Index() {
     {
       title: tPortals("supervisor.title"),
       description: tPortals("supervisor.description"),
-      href: "/login/supervisor",
+      href: "https://courier.staging.dispattch.dev/login/supervisor",
       icon: Users,
     },
     {
@@ -352,7 +352,7 @@ export default function Index() {
             {tCta("subheading")}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/login/supervisor">
+            <Link href="https://courier.staging.dispattch.dev/login/supervisor">
               <Button
                 variant="outline"
                 size="lg"
@@ -378,7 +378,7 @@ export default function Index() {
               <Link href="/login/merchant" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                 {tFooter("merchant")}
               </Link>
-              <Link href="/login/supervisor" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+              <Link href="https://courier.staging.dispattch.dev/login/supervisor" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                 {tFooter("supervisor")}
               </Link>
               <button className="text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
