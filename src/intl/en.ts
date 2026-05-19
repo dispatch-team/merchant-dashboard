@@ -59,80 +59,87 @@ export const en = {
 
   // ─── Features ───────────────────────────────────────────────────────────────
   features: {
-    title: "Why Dispatch?",
-    subtitle: "Everything you need to scale your delivery operations in Ethiopia.",
-    items: {
-      unified: {
-        title: "Unified Courier API",
-        desc: "Connect once, reach every courier. Our single API abstracts the complexity of multiple providers.",
-      },
-      automated: {
-        title: "Automated Selection",
-        desc: "Choose the best courier for every shipment based on price, speed, and reliability.",
-      },
-      tracking: {
-        title: "Real-time Tracking",
-        desc: "Keep your customers informed with precise, real-time tracking for every single package.",
-      },
+    sectionLabel: "Features",
+    headline1: "Everything you need to scale",
+    headline2: "your delivery operations.",
+    shipmentManagement: {
+      title: "Shipment Management",
+      description: "Create, manage and track all your deliveries from a single dashboard.",
+    },
+    fleetCoordination: {
+      title: "Fleet Coordination",
+      description: "Connect with top courier partners and manage dispatching seamlessly.",
+    },
+    performanceAnalytics: {
+      title: "Performance Analytics",
+      description: "Gain insights into delivery success rates, times, and courier performance.",
+    },
+    apiIntegration: {
+      title: "API Integration",
+      description: "Automate your workflows with our robust and developer-friendly API.",
+    },
+    locationIntelligence: {
+      title: "Location Intelligence",
+      description: "Precise geocoding and routing for Addis Ababa's complex address system.",
+    },
+    courierRatings: {
+      title: "Courier Ratings",
+      description: "Rate couriers and drivers to ensure high-quality service across the network.",
     },
   },
 
   // ─── How It Works ───────────────────────────────────────────────────────────
   howItWorks: {
-    title: "How It Works",
-    subtitle: "Three simple steps to streamline your logistics.",
-    steps: {
-      connect: {
-        title: "Connect",
-        desc: "Register as a merchant and integrate our lightweight API or use our intuitive dashboard.",
-      },
-      ship: {
-        title: "Ship",
-        desc: "Create shipments and instantly see available courier partners with transparent pricing.",
-      },
-      track: {
-        title: "Track",
-        desc: "Monitor your deliveries in real-time and receive automated status updates via webhooks.",
-      },
+    sectionLabel: "How it works",
+    headline: "Three simple steps to streamline your logistics.",
+    step1: {
+      title: "Connect & Configure",
+      description: "Register as a merchant and integrate our API or use the intuitive dashboard to get started.",
+    },
+    step2: {
+      title: "Create Shipments",
+      description: "Enter pickup and delivery details to instantly see available courier partners and pricing.",
+    },
+    step3: {
+      title: "Track & Analyze",
+      description: "Monitor deliveries in real-time, receive updates via webhooks, and analyze performance.",
     },
   },
 
   // ─── Portals ───────────────────────────────────────────────────────────────
   portals: {
-    title: "Explore our Portals",
-    subtitle: "Tailored experiences for every stakeholder in the ecosystem.",
+    sectionLabel: "Portals",
+    headline: "Explore our Portals",
+    subheading: "Tailored experiences for every stakeholder in the delivery ecosystem.",
     merchant: {
       title: "Merchant Portal",
-      desc: "Manage orders, partners, and business analytics.",
-      action: "Merchant Login",
+      description: "Manage orders, partners, and business analytics. Create shipments and track them in real time.",
     },
     supervisor: {
       title: "Supervisor Portal",
-      desc: "Oversee courier operations and driver management.",
-      action: "Supervisor Login",
+      description: "Oversee courier operations, manage drivers, and monitor fleet performance across the city.",
     },
     admin: {
       title: "Admin Portal",
-      desc: "Global system configuration and platform monitoring.",
-      action: "Admin Login",
+      description: "Global system configuration, platform monitoring, and user management for the entire network.",
     },
   },
 
   // ─── CTA ───────────────────────────────────────────────────────────────────
   cta: {
-    title: "Ready to simplify your deliveries?",
-    subtitle: "Join the growing network of merchants using Dispatch to reach their customers faster.",
-    button: "Create Your Account",
+    headline1: "Ready to simplify",
+    headline2: "your deliveries?",
+    subheading: "Join the growing network of merchants using Dispatch to reach their customers faster.",
+    courierLogin: "Courier Login",
   },
 
   // ─── Footer ────────────────────────────────────────────────────────────────
   footer: {
-    rights: "© {year} Dispatch. All rights reserved.",
-    links: {
-      privacy: "Privacy Policy",
-      terms: "Terms of Service",
-      contact: "Contact Support",
-    },
+    merchant: "Merchant Portal",
+    supervisor: "Supervisor Portal",
+    admin: "Admin Portal",
+    downloadDriverApp: "Download Driver App",
+    copyright: "© 2026 Dispatch. All rights reserved.",
   },
 
   // ─── Login ─────────────────────────────────────────────────────────────────
