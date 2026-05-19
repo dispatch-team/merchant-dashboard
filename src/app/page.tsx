@@ -82,7 +82,7 @@ export default function Index() {
     {
       title: tPortals("admin.title"),
       description: tPortals("admin.description"),
-      href: "/login/admin",
+      href: "https://admin.staging.dispattch.dev/",
       icon: Shield,
     },
   ];
@@ -384,7 +384,7 @@ export default function Index() {
               <button className="text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
                 {tFooter("downloadDriverApp")}
               </button>
-              <Link href="/login/admin" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+              <Link href="https://admin.staging.dispattch.dev/" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                 {tFooter("admin")}
               </Link>
             </div>
